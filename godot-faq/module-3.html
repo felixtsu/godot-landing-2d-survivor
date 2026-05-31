@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块三：子弹的感应建模与发射</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块三</div>
+            <h1>子弹设计与发射逻辑</h1>
+            <p>Area2D 感应体设计、方向计算与父子运动解耦</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>穿透感应：</strong>子弹不应像实体墙一样撞停敌人，而是"重叠"后触发事件。</li>
+                <li><strong>独立运动：</strong>子弹发射后，其运动轨迹应独立于玩家（玩家移动，子弹不随动）。</li>
+                <li><strong>寿命管理：</strong>飞出范围或存活时间过长需销毁。</li>
+            </ul>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成 Node Tree</div>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">在独立场景 <code>Bullet.tscn</code> 中构建：</p>
+            <div class="node-tree">
+                <span class="root">Node2D</span> <span class="note">（根节点：负责基础位移逻辑）</span>
+                <span class="child">├── Sprite2D</span> <span class="note">（视觉图片）</span>
+                <span class="child">├── Area2D</span> <span class="note">（感应核心，负责重叠检测）</span>
+                <span class="child">└── CollisionShape2D</span> <span class="note">（感应范围）</span>
+            </div>
+        </div>
+
+        <!-- Screenshots -->
+        <div class="content-card" style="border-left-color: var(--secondary);">
+            <img src="images/设置Player子弹发射位置Marker.png" alt="设置Player子弹发射位置Marker" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-bottom:16px;">
+            <div class="img-caption">📷 设置 Player 子弹发射位置 Marker</div>
+            <img src="images/把子弹加入到Player的场景.png" alt="把子弹加入到Player的场景" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <div class="img-caption">📷 把子弹加入到 Player 的场景</div>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 代码处理 Logic</div>
+            <p style="margin-bottom: 12px; color: var(--text-muted);">在 <code>Player.gd</code> 发射子弹：</p>
+            <div class="code-block">
+<pre># Player.gd
+func shoot():
+    var target = get_nearest_enemy()
+    if target == null: return
+
+    var bullet = bullet_scene.instantiate()
+    bullet.global_position = $Muzzle.global_position
+
+    # 向量计算：计算指向目标的归一化方向
+    bullet.direction = (target.global_position - global_position).normalized()
+
+    # 注意：加到 parent (World) 而非 self，实现运动解耦
+    get_parent().add_child(bullet)</pre>
+            </div>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>Area2D vs CharacterBody2D：</strong>子弹用 Area2D 是因为只需要"感知重叠"，不需要物理碰撞反馈</li>
+                <li><strong>normalized()：</strong>将方向向量转为单位向量（长度=1），保证子弹速度在各方向一致</li>
+                <li><strong>add_child 到 parent：</strong>如果加到 Player 节点下，子弹会跟着 Player 一起移动</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

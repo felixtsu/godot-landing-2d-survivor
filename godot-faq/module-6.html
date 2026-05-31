@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块六：TileMapLayer 地图建造</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块六</div>
+            <h1>TileMapLayer：建造你的世界</h1>
+            <p>用瓦片拼出地图，给墙壁加上物理碰撞</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>瓦片拼图：</strong>用小方块（瓦片）拼出大地图，类似 Minecraft / 复古游戏编辑器。</li>
+                <li><strong>物理碰撞：</strong>墙壁需要加 Physics Layer，玩家和敌人都被挡住，不能穿墙。</li>
+                <li><strong>地板无碰撞：</strong>地板只是视觉效果，不需要碰撞。</li>
+            </ul>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成 Node Tree</div>
+            <p style="color: var(--text-muted);">在 <code>Main</code> 场景中添加：</p>
+            <div class="node-tree">
+                <span class="root">Main（Node2D）</span> <span class="note">（游戏主场景）</span>
+                <span class="child">├── Player</span> <span class="note">（玩家角色）</span>
+                <span class="child">├── EnemySpawner</span> <span class="note">（敌人生成器）</span>
+                <span class="child">└── TileMapLayer</span> <span class="note">（地图层，注意：不是 TileMap）</span>
+            </div>
+            <p style="margin-top: 16px; color: var(--text-muted); font-size: 0.9em;">⚠️ <strong>Godot 4 用 TileMapLayer</strong>，不是 TileMap（TileMap 是 Godot 3 的旧名字）</p>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 操作步骤 Step by Step</div>
+            
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>第一步：导入瓦片图片</strong></p>
+            <p style="margin-bottom: 12px;"><a href="images/kenney_tileset_spritesheet.png" target="_blank" rel="noopener noreferrer">⬇️ 打开瓦片图 <code>kenney_tileset_spritesheet.png</code></a>（随站点一同部署；在新标签页打开后，用浏览器「另存为」保存到本地，再拖入 Godot）</p>
+            <div class="code-block">
+<pre>1. 把 <code>kenney_tileset_spritesheet.png</code>（16×16 像素，7列×3行，共21块瓦片）拖入 FileSystem 面板
+2. 图片会被导入为资源</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第二步：创建 TileMapLayer</strong></p>
+            <div class="code-block">
+<pre>1. 在 Main 场景右键 → 添加子节点
+2. 搜索 "TileMapLayer" → 创建
+3. Inspector → Tile Set → 点击 "New TileSet"
+4. 底部会打开 TileSet 编辑器面板</pre>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; margin-top: 16px;">
+                <img src="images/加入TilemapLayer节点.png" alt="加入 TilemapLayer 节点" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div class="img-caption">📷 创建 TileMapLayer 节点</div>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第三步：把图片变成瓦片</strong></p>
+            <div class="code-block">
+<pre>1. 在 TileSet 编辑器中，点击左侧 + 按钮新建
+2. 把 FileSystem 里的 <code>kenney_tileset_spritesheet.png</code> 拖入编辑器空白区域
+3. 系统会弹出切片设置：将 <strong>Columns</strong> 设为 <code>7</code>，<strong>Canvas</strong> 保持默认，确认即自动切片</pre>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; margin-top: 16px;">
+                <img src="images/导入Atlas.png" alt="导入 Atlas 瓦片集" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div class="img-caption">📷 把瓦片图片导入为 TileSet Atlas</div>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第四步：给墙壁加碰撞（Physics Layer）</strong></p>
+            <div class="code-block">
+<pre>1. 在 TileSet 编辑器展开 "Physics Layers"
+2. 点击 "Add Element"（会看到 "Physics Layer 0" = 第一层）
+3. 切换到 Paint（画笔）工具
+4. 在左边的瓦片列表中，选中有墙壁图案的瓦片
+5. 在编辑区域点击墙壁图块 → 涂上 Physics Layer 0 标记
+6. 现在这个瓦片就有物理碰撞了！</pre>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; margin-top: 16px;">
+                <img src="images/标记墙体Tile.png" alt="标记墙体 Physics Layer" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div class="img-caption">📷 在 TileSet 编辑器中为墙壁瓦片标记 Physics Layer 0</div>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第五步：在场景里画地图</strong></p>
+            <div class="code-block">
+<pre>1. 画地图前，先把编辑器左下角切换到 <strong>2D</strong> Tab（不是 3D 视图）
+2. 在右侧 Scene 面板选中 <strong>TileMapLayer</strong> 节点
+3. 在顶部工具栏选择 Brush（画笔）工具
+4. 选择地板瓦片 → 在编辑区画地板（随便画）
+5. 选择墙壁瓦片 → 画墙壁（这些墙是真正挡人的）
+6. <strong>双击</strong>已画的瓦片可以<strong>擦除</strong>（取消该格）
+7. F5 测试：玩家和敌人都被墙挡住 = 成功！</pre>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; margin-top: 16px;">
+                <img src="images/在场景中画出地图.png" alt="在场景中用 TileMapLayer 画地图" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+                <div class="img-caption">📷 在 2D 编辑视图中用 Brush 工具绘制地图</div>
+            </div>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>Physics Layer 没 Add Element 就画 = 墙壁穿人！</strong>学生最常忘记的一步</li>
+                <li><strong>TileMapLayer vs TileMap：</strong>Godot 4 新名字是 TileMapLayer，老名字 TileMap 仍然可用但已过时</li>
+                <li><strong>地板不需要 Physics Layer：</strong>只有墙要加碰撞标记</li>
+                <li><strong>TileSet 里有碰撞标记的瓦片：</strong>CharacterBody2D（如 Player、Enemy）会自动被挡住</li>
+            </ul>
+        </div>
+
+        <!-- Key concept -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">💡 核心概念</div>
+            <ul class="feature-list">
+                <li><strong>TileSet = 瓦片资源包</strong>：定义每块瓦片长什么样、有没有碰撞</li>
+                <li><strong>TileMapLayer = 画布</strong>：在场景里用瓦片画画</li>
+                <li><strong>Physics Layer 0 = 墙壁标记</strong>：有这个标记的瓦片 = 会被物理对象挡住</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

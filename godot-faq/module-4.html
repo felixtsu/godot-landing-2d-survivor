@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块四：碰撞判定与信号反馈</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块四</div>
+            <h1>让子弹真正打中敌人</h1>
+            <p>Layer/Mask 交叉配置，信号驱动碰撞销毁逻辑</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>感应过滤：</strong>子弹应只对敌人层产生反应，忽略玩家。</li>
+                <li><strong>事件驱动：</strong>当重叠发生，由物理引擎通知脚本执行 <code>queue_free()</code>。</li>
+            </ul>
+        </div>
+
+        <!-- Node Tree / Collision Config -->
+        <div class="content-card tree-card">
+            <div class="section-title">🎯 物理层级配置 Collision</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+                <div style="background: #fff3e0; border-radius: 10px; padding: 16px;">
+                    <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">Enemy (CharacterBody2D)</div>
+                    <div style="font-family: monospace; color: var(--text-muted);">
+                        Layer → <strong>2</strong>，Mask → <strong>3</strong>
+                    </div>
+                </div>
+                <div style="background: #e3f2fd; border-radius: 10px; padding: 16px;">
+                    <div style="font-weight: 600; color: var(--secondary); margin-bottom: 8px;">Bullet (Area2D)</div>
+                    <div style="font-family: monospace; color: var(--text-muted);">
+                        Layer → <strong>3</strong>，Mask → <strong>2</strong>
+                    </div>
+                </div>
+            </div>
+            <img src="images/设置bullet的CollisionLayer和Mask.png" alt="设置bullet的CollisionLayer和Mask" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-top: 16px;">
+            <div class="img-caption">📷 Enemy Layer 2 Mask 3，Bullet Layer 3 Mask 2</div>
+            <p style="margin-top: 14px; color: var(--text-muted); font-size: 0.9em;">⚠️ Layer 是"我是什么"，Mask 是"我能碰到什么"。两者数值对应才能触发碰撞。</p>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 代码处理 Logic</div>
+            <p style="margin-bottom: 12px; color: var(--text-muted);">在 <code>Bullet.gd</code> 中处理 <code>body_entered</code> 信号：</p>
+            <div class="code-block">
+<pre># Bullet.gd
+var direction = Vector2.ZERO
+var speed = 600
+
+func _process(delta):
+    position += direction * speed * delta
+
+# 信号连接至此函数
+func _on_area_2d_body_entered(body: Node2D):
+    # 再次确认目标身份
+    if body.is_in_group("enemies"):
+        body.queue_free()   # 销毁敌人
+        queue_free()        # 销毁子弹自己</pre>
+            </div>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>Layer/Mask 搞反是最高频错误：</strong>Enemy Layer=2 Mask=3，Bullet Layer=3 Mask=2（两者 Mask 交叉，Layer 互为对方的 Mask 值）</li>
+                <li><strong>信号连接方法：</strong>在 Area2D 节点的 Node 面板搜索 <code>body_entered</code>，拖拽连接到 Bullet.gd 的函数</li>
+                <li><strong>queue_free()：</strong>标记节点在本帧结束后销毁，安全删除，不会影响当次碰撞检测循环</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

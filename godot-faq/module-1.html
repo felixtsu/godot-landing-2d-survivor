@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块一：敌人的原型建模与动态生成</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块一</div>
+            <h1>设计敌人与生成敌人</h1>
+            <p>用 PackedScene 实例化敌人，掌握随机分布技巧</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>多实例需求：</strong>运行时需要同时存在多个敌人，且逻辑一致。</li>
+                <li><strong>物理特性：</strong>需要具备位移能力，能被障碍物（如墙壁）挡住，且能被子弹检测到。</li>
+                <li><strong>随机性：</strong>每个敌人被创建时，位置应在地图范围内随机分布。</li>
+            </ul>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成 Node Tree</div>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">在独立场景 <code>Enemy.tscn</code> 中构建：</p>
+            <div class="node-tree">
+                <span class="root">CharacterBody2D</span> <span class="note">（根节点：提供物理位移 + 碰撞反馈）</span>
+                <span class="child">├── Sprite2D</span> <span class="note">（视觉贴图）</span>
+                <span class="child">└── CollisionShape2D</span> <span class="note">（物理边界，通常用 CircleShape2D）</span>
+            </div>
+        </div>
+
+        <!-- Screenshot -->
+        <div class="content-card" style="border-left-color: var(--secondary);">
+            <img src="images/把敌人加入World的场景.png" alt="把敌人加入World场景" style="max-width:100%; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <div class="img-caption">📷 把敌人加入 World 的场景</div>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 代码处理 Logic</div>
+            <p style="margin-bottom: 12px; color: var(--text-muted);">在主世界 <code>World.gd</code> 中处理生成逻辑：</p>
+            <div class="code-block">
+<pre># World.gd
+extends Node2D
+
+@export var enemy_scene: PackedScene  # 引用 Enemy.tscn 文件
+
+func spawn_enemy():
+    # 1. 实例化：在内存中创建对象
+    var enemy = enemy_scene.instantiate()
+
+    # 2. 坐标计算：设定随机坐标
+    var screen_size = get_viewport_rect().size
+    enemy.global_position = Vector2(
+        randf_range(0, screen_size.x),
+        randf_range(0, screen_size.y)
+    )
+
+    # 3. 挂载：将其加入场景树，正式激活节点
+    add_child(enemy)</pre>
+            </div>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>@export var enemy_scene: PackedScene：</strong>在 Inspector 面板里拖入 Enemy.tscn 即可关联</li>
+                <li><strong>randf_range：</strong>每次调用产生不同的随机浮点数，确保敌人位置不重叠</li>
+                <li><strong>实例化三步曲：</strong> instantiate() → 设位置 → add_child()</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

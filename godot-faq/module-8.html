@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块八：CanvasLayer 与计分系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块八</div>
+            <h1>CanvasLayer：独立的 GUI 层</h1>
+            <p>给游戏加上分数显示，掌握数据层与展示层分离的概念</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>GUI 独立层：</strong>CanvasLayer 是特殊层，里面的内容永远固定在屏幕上，不随相机移动。</li>
+                <li><strong>展示与数据分离：</strong>展示层（Label）只负责显示，数据层（Main.gd 的 score 变量）负责存储。</li>
+                <li><strong>触发点：</strong>Bullet.gd 的 queue_free() 时自动触发计分，不需要额外逻辑。</li>
+                <li><strong>不需要 Autoload：</strong>第一阶段只有一个场景，直接把 score 写在 Main.gd 里就够了。</li>
+            </ul>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成 Node Tree</div>
+            <p style="color: var(--text-muted);">在 <code>Main</code> 场景中添加：</p>
+            <div class="node-tree">
+                <span class="root">Main（Node2D）</span> <span class="note">（游戏主场景）</span>
+                <span class="child">├── Player</span> <span class="note">（玩家角色）</span>
+                <span class="child">├── CanvasLayer</span> <span class="note">（GUI 独立层，不随相机动）</span>
+                <span class="child">│    └── Label</span> <span class="note">（显示分数）</span>
+                <span class="child">├── BulletSpawner</span> <span class="note">（子弹生成器）</span>
+                <span class="child">└── EnemySpawner</span> <span class="note">（敌人生成器）</span>
+            </div>
+            <p style="margin-top: 16px; color: var(--text-muted); font-size: 0.9em;">⚠️ <strong>CanvasLayer 永远是 Player 的兄弟节点</strong>，不是 Player 的子节点！放在 CanvasLayer 里的节点不受相机影响。</p>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 操作步骤 Step by Step</div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>第一步：添加 CanvasLayer</strong></p>
+            <div class="code-block">
+<pre>1. 在 Main 场景右键 → 添加子节点
+2. 搜索 "CanvasLayer" → 创建
+3. 它会自动显示在整个场景上方（独立层）</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第二步：在 CanvasLayer 下添加 Label</strong></p>
+            <div class="code-block">
+<pre>1. 选中 CanvasLayer，右键 → 添加子节点
+2. 搜索 "Label" → 创建
+3. 设置 Label 的 text = "Score: 0"
+4. 在 2D 视图中拖动 Label 到屏幕左上角</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第三步：在 Main.gd 添加分数变量</strong></p>
+            <div class="code-block">
+<pre>extends Node2D
+
+var score: int = 0	# 初始 0
+
+func add_score(amount: int = 1):
+	score += amount
+	update_gui()
+
+func update_gui():
+	$CanvasLayer/Label.text = "Score: %d" % score</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第四步：在 Bullet.gd 的 queue_free() 旁加 1 行</strong></p>
+            <div class="code-block">
+<pre>func _on_area_entered(area):
+	area.get_parent().queue_free()	# 原有：敌人消失
+	# 注：如果你的主场景节点不叫 Main.tscn，把 "/root/Main" 换成实际节点名
+	get_node("/root/Main").add_score()	# 新增：+1 分
+	queue_free()				# 原有：子弹消失</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第五步：F5 测试</strong></p>
+            <div class="code-block">
+<pre>1. F5 运行游戏
+2. 射击消灭敌人
+3. 屏幕左上角 Label 的分数 +1 = 成功！</pre>
+            </div>
+        </div>
+
+        <!-- Three-Layer Architecture -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">🏗️ 三层架构：展示层 = 数据层 ← 触发点</div>
+            <ul class="feature-list">
+                <li><strong>展示层（CanvasLayer + Label）：</strong>只管显示分数，不知道数据从哪来，也不知道怎么算的。</li>
+                <li><strong>数据层（Main.gd 的 score）：</strong>存储当前分数（初始 0），展示层从这里读，触发点来这里写。</li>
+                <li><strong>触发点（Bullet.gd 的 queue_free()）：</strong>消灭敌人时自动触发 add_score()，不需要额外逻辑。</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--primary); font-weight: bold;">口诀：展示层 = 数据层 ← 触发点（Bullet queue_free 时 +1）</p>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>CanvasLayer 不是 Player 的子节点：</strong>它是 Main 的子节点，和 Player 平级。放在它里面的内容不受相机影响，永远固定。</li>
+                <li><strong>Label 位置用 anchors_preset：</strong>如果 Label 在屏幕上的位置跑掉了，设置 Label 的 anchors_preset = CENTER_TOP 或具体坐标。</li>
+                <li><strong>不需要 Autoload：</strong>第一阶段只有一个场景，score 直接写在 Main.gd 里足够。只有需要跨场景持久化状态（如 Roguelike 局间存档）时才用 Autoload。</li>
+                <li><strong>Bullet.gd 里加 1 行就够了：</strong>不需要新建场景、不需要理解新节点，只在 queue_free() 旁加一行 add_score() 即可。</li>
+            </ul>
+        </div>
+
+        <!-- Common Pitfalls -->
+        <div class="content-card" style="border-left-color: var(--secondary);">
+            <div class="section-title" style="color: var(--secondary);">⚠️ 常见坑点 Common Pitfalls</div>
+            <ul class="feature-list">
+                <li><strong>CanvasLayer 和 Camera2D 谁先渲染？</strong>CanvasLayer 是独立屏幕层，不跟随 Camera2D 的世界视角移动；即使调整 z_index，本质也不是同一坐标空间里的前后关系。</li>
+                <li><strong>玩家走到屏幕边缘时，Label 会跑出屏幕吗？</strong>不会。只要 Label 在 CanvasLayer 下，它会固定在屏幕坐标系，玩家和相机移动都不会把它“带走”。</li>
+                <li><strong>正确节点层级：</strong>CanvasLayer 放在 Main 下，和 Player 平级；不要把 CanvasLayer 挂到 Player 子树里，避免后续结构混乱和调试困难。</li>
+                <li><strong>最常见误判：</strong>“相机开了 smoothing，所以 GUI 延迟了”。其实延迟的是世界画面，CanvasLayer 上的 Label 仍然是实时刷新；看起来“慢一拍”通常是分数更新函数没被调用。</li>
+                <li><strong>多相机场景注意：</strong>如果后续加了第二个 Camera2D（例如观战镜头），CanvasLayer 依然只看屏幕，不看哪个相机在工作；这正是做 HUD 的优势。</li>
+            </ul>
+        </div>
+
+        <div class="content-card" style="border-left-color: #8e44ad;">
+            <div class="section-title" style="color: #8e44ad;">🧭 Camera2D 配合 CanvasLayer 的排错清单</div>
+            <div class="code-block">
+<pre>1) Label 跟着地图跑了？
+   -> 检查它是不是误放在 Player/World 子节点，而不是 CanvasLayer 下
+
+2) 分数不更新但 Label 固定正常？
+   -> 检查 add_score() 有没有被 Bullet.gd 的命中逻辑调用
+
+3) 开了相机平滑后感觉 UI 不同步？
+   -> 这是视觉错觉，先打印 score 变量确认数据是否实时变化
+
+4) 想让 UI 也跟着相机缩放？
+   -> 不要用 CanvasLayer，改用世界节点 + Camera2D，属于另一套设计</pre>
+            </div>
+            <p style="margin-top: 12px; color: var(--text-muted);">一句话记忆：<strong>Camera2D 管世界，CanvasLayer 管屏幕</strong>。两者职责分离，就不容易踩坑。</p>
+        </div>
+
+        <!-- Key concept -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">💡 核心概念</div>
+            <ul class="feature-list">
+                <li><strong>CanvasLayer = 独立的 GUI 层</strong>：不随相机移动，永远固定在屏幕上</li>
+                <li><strong>展示与数据分离</strong>：Label 只负责显示，Main.gd 的 score 负责存储</li>
+                <li><strong>queue_free() = 消失</strong>：从场景树移除对象，视觉上就看不见了</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot 战斗系统实践手册</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container container-wide">
+
+        <div class="index-header">
+            <h1>🎮 Godot 战斗系统实践手册</h1>
+            <p class="subtitle">敌人 · 射击与战斗系统 · 九个模块 + Challenges 进阶练习</p>
+        </div>
+
+        <div class="module-grid">
+            <a href="module-1.html" class="module-card">
+                <div class="module-num">模块一</div>
+                <h2>设计敌人与生成敌人</h2>
+                <p>用 PackedScene 动态实例化敌人，设置随机出生位置，让它们出现在地图任意角落。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-2.html" class="module-card">
+                <div class="module-num">模块二</div>
+                <h2>寻找并锁定最近的敌人</h2>
+                <p>用 Group 标记敌人身份，遍历所有敌人并计算距离，找出离玩家最近的那个。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-3.html" class="module-card">
+                <div class="module-num">模块三</div>
+                <h2>子弹设计与发射逻辑</h2>
+                <p>用 Area2D 实现子弹感应、方向计算、独立运动，以及与玩家的运动解耦。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-4.html" class="module-card">
+                <div class="module-num">模块四</div>
+                <h2>让子弹真正打中敌人</h2>
+                <p>配置 Layer/Mask 过滤碰撞对象，用 body_entered 信号驱动敌人销毁与子弹消失。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-5.html" class="module-card">
+                <div class="module-num">模块五</div>
+                <h2>使用计时器定时生成</h2>
+                <p>用 Timer 节点实现定时生成敌人，掌握 Autostart 和 timeout 信号的连接方法。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-6.html" class="module-card">
+                <div class="module-num">模块六</div>
+                <h2>TileMapLayer：建造你的世界</h2>
+                <p>用瓦片拼出地图，给墙壁加上物理碰撞，玩家和敌人都被墙挡住。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-7.html" class="module-card">
+                <div class="module-num">模块七</div>
+                <h2>Camera2D：让相机跟着玩家走</h2>
+                <p>把 Camera2D 加到 Player 子节点，勾选 Enabled，地图大时也能看到全貌。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-8.html" class="module-card">
+                <div class="module-num">模块八</div>
+                <h2>CanvasLayer：独立的 GUI 层</h2>
+                <p>给游戏加上分数显示，掌握展示层与数据层分离的概念，Bullet 消灭敌人时自动计分。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="module-9.html" class="module-card">
+                <div class="module-num">模块九</div>
+                <h2>导弹发射与命中爆炸</h2>
+                <p>Z键发射导弹，Timer超时或碰撞敌人时触发爆炸效果，Explosion 0.2秒后自动消失。</p>
+                <div class="arrow">→</div>
+            </a>
+
+            <a href="challenges.html" class="module-card" style="border-top-color: #8e44ad;">
+                <div class="module-num" style="color: #8e44ad;">Challenges</div>
+                <h2>挑战题练习页</h2>
+                <p>覆盖模块1-8的分级训练，每题提供 ⭐ / ⭐⭐ / ⭐⭐⭐ 难度与教师批改建议。</p>
+                <div class="arrow" style="color: #8e44ad;">→</div>
+            </a>
+        </div>
+
+        <div class="note-card">
+            <h2>📋 老师注记</h2>
+            <p>以下两点是学生最容易出错的地方，讲课时可以特别提醒：</p>
+            <ul>
+                <li>重点检查 <strong>Layer / Mask</strong> 的对应关系，这是碰撞失效最常见的原因</li>
+                <li>确保子弹发射时 <code>add_child</code> 到了 <strong>World</strong> 节点，而不是 Player 自己</li>
+                <li><strong>TileMapLayer 的 Physics Layer</strong> 没 Add Element 就画 = 墙壁穿人！</li>
+                <li><strong>Camera2D</strong> 要勾 Enabled 属性才能生效</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

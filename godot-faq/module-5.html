@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块五：计时器与自动化循环</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块五</div>
+            <h1>使用计时器定时生成</h1>
+            <p>Timer 定时器控制敌人自动生成节奏</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>固定周期：</strong>每隔 X 秒执行一次特定逻辑（如：生成敌人）。</li>
+            </ul>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点配置</div>
+            <ul class="feature-list" style="margin-top: 14px;">
+                <li>在 <strong>World</strong> 节点下添加 <strong>Timer</strong> 子节点</li>
+                <li><strong>Wait Time：</strong>设定周期秒数（如 2.0 = 每2秒）</li>
+                <li><strong>Autostart：</strong>勾选后场景加载完毕自动开始计时</li>
+                <li><strong>One Shot：</strong>不勾选则循环重复触发</li>
+            </ul>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 代码连接</div>
+            <p style="margin-bottom: 12px; color: var(--text-muted);">在 <code>World.gd</code> 中连接 timeout 信号：</p>
+            <div class="code-block">
+<pre># World.gd
+func _on_timer_timeout():
+    spawn_enemy()  # 每次闹钟响，执行一次生成</pre>
+            </div>
+            <p style="margin-top: 14px; color: var(--text-muted); font-size: 0.9em;">💡 信号连接方式：在 Timer 节点的 Node 面板找到 <code>timeout</code> 信号，连接到 World.gd 的 <code>_on_timer_timeout</code> 函数。</p>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>Timer 节点自带时间逻辑：</strong>不需要在 <code>_process</code> 里手动计数，直接用信号就行</li>
+                <li><strong>Autostart 勾不勾？</strong>如果需要代码控制开始/暂停，不勾，用 <code>timer.start()</code> 和 <code>timer.stop()</code> 控制</li>
+                <li><strong>暂停敌人生成：</strong>调用 <code>$Timer.stop()</code>，恢复时调用 <code>$Timer.start()</code></li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>
