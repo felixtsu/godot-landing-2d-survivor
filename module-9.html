@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块九：导弹发射与命中爆炸</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块九</div>
+            <h1>导弹发射与命中爆炸</h1>
+            <p>分三阶段掌握导弹飞行、爆炸效果、碰撞检测的完整流程</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 特性分析 Features</div>
+            <ul class="feature-list">
+                <li><strong>Z键触发：</strong>按下 Z 键实例化一枚 Missile，方向朝向最近敌人。</li>
+                <li><strong>导弹飞行：</strong>Missile 以 direction × speed 每帧飞行，方向在发射时锁定。</li>
+                <li><strong>两种爆炸触发：</strong>1秒超时自动爆炸，或飞行中碰到敌人立即爆炸。</li>
+                <li><strong>爆炸效果：</strong>explode() 在当前位置生成 Explosion 场景，0.2秒后自动删除。</li>
+            </ul>
+        </div>
+
+        <!-- Flow Chart -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">⚙️ 完整流程图</div>
+            <div class="code-block">
+<pre>按下 Z
+  ↓
+Player.instantiate() Missile
+  ↓
+Missile 飞行（direction * speed）
+  ↓
+├─→ 1秒超时 → Timer.timeout → explode()
+│
+└─→ 碰到 enemy → body_entered → explode()
+     ↓
+  生成 Explosion (global_position)
+     ↓
+  Missile.queue_free()
+     ↓
+  Explosion 0.2秒后自动删除</pre>
+            </div>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成 Node Tree</div>
+            <p style="color: var(--text-muted);">在 <code>Player</code> 场景中添加（作为子节点）：</p>
+            <div class="node-tree">
+                <span class="root">Player（CharacterBody2D）</span> <span class="note">（玩家角色）</span>
+                <span class="child">├── Sprite2D</span> <span class="note">（外观）</span>
+                <span class="child">├── CollisionShape2D</span> <span class="note">（碰撞体）</span>
+                <span class="child">├── Timer</span> <span class="note">（导弹发射冷却，可选）</span>
+                <span class="child">└── ...（其他节点）</span>
+            </div>
+            <p style="margin-top: 16px; color: var(--text-muted);">Missile 和 Explosion 是独立场景，不放在 Player 树下，通过代码动态实例化。</p>
+            <div class="node-tree" style="margin-top: 12px;">
+                <span class="root">Missile（Area2D）</span> <span class="note">（导弹独立场景）</span>
+                <span class="child">├── Sprite2D</span> <span class="note">（导弹外观）</span>
+                <span class="child">├── CollisionShape2D</span> <span class="note">（碰撞检测）</span>
+                <span class="child">└── Timer</span> <span class="note">（1秒后自动爆炸）</span>
+            </div>
+            <div class="node-tree" style="margin-top: 12px;">
+                <span class="root">Explosion（Node2D）</span> <span class="note">（爆炸效果独立场景）</span>
+                <span class="child">├── Sprite2D / AnimatedSprite2D</span> <span class="note">（爆炸动画）</span>
+                <span class="child">└── Timer</span> <span class="note">（0.2秒后删除自己）</span>
+            </div>
+        </div>
+
+        <!-- Logic -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ 操作步骤 Step by Step</div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>第一步：创建 Missile 场景</strong></p>
+            <div class="code-block">
+<pre>1. 项目 → 场景 → 新建场景
+2. 根节点选 Area2D，命名为 Missile
+3. 添加子节点：Sprite2D + CollisionShape2D + Timer
+4. 给 Timer 设置 Wait Time = 1.0，One Shot = On
+5. 保存为 missile.tscn</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第二步：创建 Explosion 场景</strong></p>
+            <div class="code-block">
+<pre>1. 项目 → 场景 → 新建场景
+2. 根节点选 Node2D，命名为 Explosion
+3. 添加子节点：AnimatedSprite2D（或 Sprite2D）+ Timer
+4. 给 Timer 设置 Wait Time = 0.2，One Shot = On
+5. 保存为 explosion.tscn</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第三步：编写 Missile.gd</strong></p>
+            <div class="code-block">
+<pre>extends Area2D
+
+var speed: float = 400.0
+var direction: Vector2 = Vector2.ZERO
+var explosion_scene: PackedScene = preload("res://explosion.tscn")
+
+func _physics_process(delta):
+	position += direction * speed * delta
+
+func _on_timer_timeout():
+	explode()
+
+func _on_body_entered(body):
+	explode()
+
+func explode():
+	# 生成爆炸效果
+	var explosion = explosion_scene.instantiate()
+	explosion.global_position = global_position
+	get_tree().root.add_child(explosion)
+	# 导弹消失
+	queue_free()</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第四步：在 Player.gd 添加发射逻辑（Z键）</strong></p>
+            <div class="code-block">
+<pre>extends CharacterBody2D
+
+var missile_scene: PackedScene = preload("res://missile.tscn")
+
+func _input(event):
+	if event.is_action_pressed("ui_accept"):  # Z键（Godot默认ui_accept映射到Z）
+		fire_missile()
+
+func fire_missile():
+	# 找出最近的敌人
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	if enemies.is_empty():
+		return
+	var closest = enemies.reduce(func(a, b):
+		return a if a.global_position.distance_to(global_position) < b.global_position.distance_to(global_position) else b
+	)
+	var dir = (closest.global_position - global_position).normalized()
+	# 实例化导弹
+	var missile = missile_scene.instantiate()
+	missile.direction = dir
+	missile.global_position = global_position
+	get_tree().root.add_child(missile)</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第五步：给敌人打上 Group 标签</strong></p>
+            <div class="code-block">
+<pre>1. 在 Enemy 场景的根节点上右键
+2. 选择"为节点设置组..."
+3. 输入 "enemies" → 确定</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>第六步：F5 测试</strong></p>
+            <div class="code-block">
+<pre>1. F5 运行游戏
+2. 按 Z 键发射导弹
+3. 导弹飞向最近敌人，命中后爆炸 = 成功！</pre>
+            </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">🏗️ 架构：独立场景 × 动态实例化</div>
+            <ul class="feature-list">
+                <li><strong>Missile / Explosion 独立场景：</strong>不嵌入 Player 树，通过 preload + instantiate() 动态创建。</li>
+                <li><strong>方向锁定：</strong>direction 在 fire_missile() 时计算并传给 Missile，发射后不再改变。</li>
+                <li><strong>两种爆炸触发：</strong>Timer.timeout（时间到达）和 body_entered（碰撞到达），满足任一都会执行 explode()。</li>
+                <li><strong>queue_free() = 消失：</strong>从场景树移除对象，不再占用性能。</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--primary); font-weight: bold;">口诀：Z键发射 → 锁定方向 → 飞向敌人 → 爆炸消失</p>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>方向用 normalized()：</strong>missile.direction 必须 normalize，否则速度会因距离变化而不一致。</li>
+                <li><strong>add_child 到 root：</strong>missile 和 explosion 要加到 get_tree().root（主场景根节点），不要加到 Player 下，避免随 Player 移动。</li>
+                <li><strong>Timer 的 One Shot：</strong>爆炸 Timer 设为 One Shot = On，爆炸一次就够了，不要重复触发。</li>
+                <li><strong>Missile 的 CollisionLayer/Mask：</strong>确保 Missile 的 Mask 包含 "enemies" 层，否则 body_entered 收不到信号。</li>
+                <li><strong>reduce 找最近敌人：</strong>如果学生不理解 reduce，可以先用循环比较距离，原理一样。</li>
+            </ul>
+        </div>
+
+        <!-- Common Pitfalls -->
+        <div class="content-card" style="border-left-color: var(--secondary);">
+            <div class="section-title" style="color: var(--secondary);">⚠️ 常见坑点 Common Pitfalls</div>
+            <ul class="feature-list">
+                <li><strong>方向没 normalize：</strong>direction 直接用 (closest - missile).normalized() 而不是 (closest - missile)，速度会忽快忽慢。</li>
+                <li><strong>Missile 随 Player 旋转：</strong>Missile 的父节点如果是 Player 且 Player 有旋转，方向会叠加。需要把 Missile add_child 到 root 而不是 Player 下。</li>
+                <li><strong>爆炸位置偏移：</strong>用 global_position 而不是 position，确保爆炸效果出现在世界坐标的正确位置。</li>
+                <li><strong>碰撞检测没响应：</strong>检查 Missile 的 CollisionShape2D 是否已添加，以及 Mask 是否包含 enemy 层。</li>
+                <li><strong>导弹穿墙：</strong>如果 Missile 用 Area2D 而非 CharacterBody2D，它不会自动做物理碰撞，会穿过 TileMap。需要用 CharacterBody2D + move_and_collide() 才能被墙挡住。</li>
+            </ul>
+        </div>
+
+        <!-- Key concept -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">💡 核心概念</div>
+            <ul class="feature-list">
+                <li><strong>独立场景 + instantiate() = 可复用的对象池</strong>：Missile 和 Explosion 不写在 Player 里，改为独立场景按需创建</li>
+                <li><strong>direction × speed × delta = 飞行</strong>：每帧移动一定距离，方向锁定后不改变</li>
+                <li><strong>Timer + body_entered = 两种爆炸条件</strong>：时间到达或碰撞到达，满足任一就爆炸</li>
+                <li><strong>queue_free() = 性能清理</strong>：爆炸后删除自己，避免导弹和爆炸残留积累</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>
