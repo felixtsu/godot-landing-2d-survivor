@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块 9.1：实现 Missile 导弹飞行</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="module-9.html" class="back-nav">← 返回模块九总览</a>
+
+        <div class="page-header">
+            <div class="module-tag" style="color: #22c55e; border-color: #22c55e;">模块 9.1</div>
+            <h1>🎯 实现 Missile 导弹飞行</h1>
+            <p>创建导弹场景、加节点、玩家按 Z 键发射、1 秒后自动销毁</p>
+        </div>
+
+        <!-- 目标 -->
+        <div class="content-card features-card" style="border-left-color: #22c55e;">
+            <div class="section-title">🎯 本节目标</div>
+            <ul class="feature-list">
+                <li>创建独立的 <code>Missile.tscn</code> 场景</li>
+                <li>导弹发射后沿固定方向自动飞行</li>
+                <li>1 秒后自动销毁，防止内存泄漏</li>
+                <li>玩家按 Z 键即可发射导弹</li>
+            </ul>
+        </div>
+
+        <!-- 节点树 -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成</div>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">新建 <code>Missile.tscn</code>，根节点 <code>Missile (Area2D)</code>：</p>
+            <div class="node-tree">
+                <span class="root">Missile (Area2D)</span> <span class="note">（根节点：负责碰撞检测与飞行逻辑）</span>
+                <span class="child">├── Sprite2D</span> <span class="note">（显示导弹图片）</span>
+                <span class="child">├── CollisionShape2D</span> <span class="note">（导弹碰撞区域）</span>
+                <span class="child">└── Timer</span> <span class="note">（控制导弹存在时间）</span>
+            </div>
+        </div>
+
+        <!-- 操作步骤 -->
+        <div class="content-card logic-card" style="border-left-color: #22c55e;">
+            <div class="section-title">⚙️ 操作步骤 Step by Step</div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>步骤 1：创建 Missile 场景</strong></p>
+            <p>在 Godot 编辑器中操作（二选一）：</p>
+            <ul class="feature-list">
+                <li>Scene 面板 → 右键 → <strong>New Inherited Scene</strong></li>
+                <li>或：Scene 面板 → <strong>Other Node</strong> → <strong>Area2D</strong></li>
+            </ul>
+            <p>重命名根节点为 <code>Missile</code>，保存为 <code>Missile.tscn</code>。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 2：添加子节点</strong></p>
+            <p>给 <code>Missile (Area2D)</code> 添加三个子节点：</p>
+            <ul class="feature-list">
+                <li><strong>Sprite2D</strong> —— 显示导弹图片</li>
+                <li><strong>CollisionShape2D</strong> —— 导弹碰撞区域</li>
+                <li><strong>Timer</strong> —— 控制导弹存在时间</li>
+            </ul>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 3：设置 Sprite2D 图片</strong></p>
+            <ul class="feature-list">
+                <li>在 Inspector 中找到 <strong>Texture</strong></li>
+                <li>拖入导弹素材图片</li>
+                <li>调整 <strong>Transform → Scale</strong> 让导弹大小合适</li>
+            </ul>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 4：设置碰撞区域</strong></p>
+            <ul class="feature-list">
+                <li>Inspector → <strong>Shape</strong> → <strong>New RectangleShape2D</strong>（或 <strong>New CircleShape2D</strong>）</li>
+                <li>调整 Shape 的大小，覆盖导弹图片范围即可</li>
+            </ul>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 5：设置 Timer</strong></p>
+            <p>选中 <code>Timer</code>，在 Inspector 中配置：</p>
+            <div class="code-block">
+<pre>Wait Time  = 1
+One Shot   = 开启（☑）   # 只触发一次
+Autostart  = 开启（☑）   # 自动开始计时</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted);">作用：导弹飞行 1 秒后自动销毁。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 6：连接 Missile Timer 信号</strong></p>
+            <p>先给 Missile 添加一个空脚本（至少包含 <code>extends Area2D</code>），然后选中 <code>Timer</code> 节点：</p>
+            <ul class="feature-list">
+                <li>切换到 <strong>Node</strong> 面板</li>
+                <li>找到 <strong>timeout</strong> 信号</li>
+                <li>双击或点击 <strong>Connect…</strong></li>
+                <li>连接到 <code>Missile.gd</code></li>
+            </ul>
+            <p style="margin-top: 8px;">连接成功后，<code>Missile.gd</code> 会自动生成空的 <code>_on_timer_timeout()</code> 函数。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 7：补充 Missile 脚本</strong></p>
+            <p>在 <code>Missile.gd</code> 中补充变量、飞行逻辑和回调函数体：</p>
+            <div class="code-block">
+<pre>extends Area2D
+
+var direction = Vector2.RIGHT   # 飞行方向（默认向右）
+var speed = 400                 # 飞行速度 400 像素/秒
+
+func _physics_process(delta):
+    global_position += direction * speed * delta
+
+func _on_timer_timeout():
+    queue_free()                # 1 秒后自动删除导弹</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 8：玩家发射 Missile</strong></p>
+            <p>在 <code>Player.gd</code> 中添加发射逻辑：</p>
+            <div class="code-block">
+<pre>@export var missile_scene: PackedScene    # 在 Inspector 把 Missile.tscn 拖进来
+
+func _input(event):
+    if event.is_action_pressed("fire_missile"):
+        fire_missile()
+
+func fire_missile():
+    var missile = missile_scene.instantiate()
+    missile.global_position = global_position
+    get_parent().add_child(missile)</pre>
+            </div>
+            <p style="margin-top: 8px; color: #ef4444;">
+                ⚠️ <strong>关键点：</strong><code>get_parent().add_child(missile)</code> 必须把导弹加到 World 层，而不是 Player 自己。如果加到 Player 下，导弹会跟着玩家一起移动！
+            </p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 9：绑定输入（Z 键）</strong></p>
+            <p>打开项目输入设置：<strong>Project → Project Settings → Input Map</strong>，添加新动作 <code>fire_missile</code>，绑定 <strong>Z 键</strong>。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 10：运行效果</strong></p>
+            <div class="code-block">
+<pre>按下 Z
+  ↓
+实例化 Missile
+  ↓
+导弹飞行（direction * speed）
+  ↓
+1秒后自动销毁</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted);">到这里，学生已经可以测试导弹发射与飞行效果。</p>
+        </div>
+
+        <!-- 老师注记 -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>global_position vs position：</strong>发射时用 <code>global_position</code> 确保坐标系一致，避免父子节点坐标叠加导致偏移。</li>
+                <li><strong>add_child 到 parent：</strong>如果加到 Player 节点下，导弹会跟着 Player 一起移动，无法实现独立飞行。</li>
+                <li><strong>Timer 配置：</strong>One Shot 和 Autostart 都要开启，否则计时器不会自动工作。</li>
+                <li><strong>方向调整：</strong>如需让导弹朝玩家面向方向飞行，需在 Player 中记录最后朝向 <code>last_dir</code>：</li>
+            </ul>
+            <div class="code-block">
+<pre># Player.gd
+var last_dir = Vector2.RIGHT
+
+func _physics_process(delta):
+    var direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+    if direction != Vector2.ZERO:
+        last_dir = direction
+
+func fire_missile():
+    ...
+    missile.direction = last_dir</pre>
+            </div>
+        </div>
+
+        <!-- 跳转下一节 -->
+        <div class="content-card" style="background: #fff8e6; border-left-color: #22c55e; text-align: center;">
+            <p style="margin-bottom: 12px;">🚀 导弹会飞了，但撞到东西没有反应</p>
+            <a href="module-9-2.html" class="back-nav" style="display: inline-block; padding: 12px 24px; background: #22c55e; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">下一节：9.2 实现 Explosion 爆炸效果 →</a>
+        </div>
+
+    </div>
+</body>
+</html>

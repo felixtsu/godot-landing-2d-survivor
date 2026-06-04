@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块 9.3：碰到 enemy 提前爆炸</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="module-9.html" class="back-nav">← 返回模块九总览</a>
+
+        <div class="page-header">
+            <div class="module-tag" style="color: #8b5cf6; border-color: #8b5cf6;">模块 9.3</div>
+            <h1>💥 碰到 enemy 提前爆炸</h1>
+            <p>连接 Area2D 碰撞信号、检测 enemy 组、给敌人添加分组</p>
+        </div>
+
+        <!-- 目标 -->
+        <div class="content-card features-card" style="border-left-color: #8b5cf6;">
+            <div class="section-title">🎯 本节目标</div>
+            <ul class="feature-list">
+                <li>导弹碰到敌人时立即爆炸，不再等到 1 秒超时</li>
+                <li>使用 <code>body_entered</code> 信号检测碰撞</li>
+                <li>使用 <code>is_in_group("enemy")</code> 精确筛选敌人</li>
+                <li>给敌人节点添加 <code>enemy</code> 组</li>
+            </ul>
+        </div>
+
+        <!-- 状态对比 -->
+        <div class="content-card" style="background: #f5f3ff; border-left-color: #8b5cf6;">
+            <div class="section-title">🔍 当前状态 vs 目标状态</div>
+            <table class="comparison-table" style="width: 100%;">
+                <tr>
+                    <td style="padding: 10px; font-weight: bold; color: #ef4444;">目前</td>
+                    <td style="padding: 10px;">Missile 只会定时爆炸</td>
+                </tr>
+                <tr style="background: #f5f5f5;">
+                    <td style="padding: 10px; font-weight: bold; color: #22c55e;">目标</td>
+                    <td style="padding: 10px;">碰到 enemy 立即提前爆炸</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 操作步骤 -->
+        <div class="content-card logic-card" style="border-left-color: #8b5cf6;">
+            <div class="section-title">⚙️ 操作步骤 Step by Step</div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>步骤 19：连接 Missile 碰撞信号</strong></p>
+            <p>选中 <code>Missile (Area2D)</code> 节点：</p>
+            <ul class="feature-list">
+                <li>切换到 <strong>Node</strong> 面板</li>
+                <li>找到 <strong>body_entered</strong> 或 <strong>area_entered</strong> 信号</li>
+                <li>双击或点击 <strong>Connect…</strong></li>
+                <li>连接到 <code>Missile.gd</code></li>
+            </ul>
+            <p style="margin-top: 8px;">连接成功后，<code>Missile.gd</code> 会自动生成 <code>_on_body_entered(body)</code> 函数。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 20：检测 enemy 组</strong></p>
+            <p>修改 <code>Missile.gd</code>，在 <code>_on_body_entered</code> 中检测敌人：</p>
+            <div class="code-block">
+<pre>func _on_body_entered(body):
+    if body.is_in_group("enemy"):
+        explode()</pre>
+            </div>
+            <p style="margin-top: 8px;">逻辑：当 Area2D 检测到刚体进入时，先判断该 body 是否属于 <code>enemy</code> 组。如果是，立即调用 <code>explode()</code> 生成爆炸并销毁自身。</p>
+            <p style="margin-top: 8px; color: #ef4444;">
+                ⚠️ <strong>检测不到？</strong>先检查 Collision Layer / Mask：Missile 的 Mask 必须勾选敌人所在的层；敌人的 Layer 也要正确设置。两者对应上，<code>body_entered</code> 才能触发。
+            </p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 21：给敌人添加 enemy 组</strong></p>
+            <p>选中敌人节点（如 <code>Enemy</code> / <code>Slime</code> / <code>Boss</code> 等）：</p>
+            <ul class="feature-list">
+                <li>Inspector → <strong>Node</strong> → <strong>Groups</strong> → 添加 <code>enemy</code></li>
+            </ul>
+            <p style="margin-top: 8px;">这样 Missile 才能通过 <code>is_in_group("enemy")</code> 识别该节点为敌人。</p>
+            <p style="margin-top: 8px; color: #ef4444;">
+                ⚠️ <strong>注意：</strong>Group 名称区分大小写。<code>enemy</code> 与 <code>Enemy</code> 被视为不同组，脚本与编辑器中务必保持一致。
+            </p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 22：运行效果</strong></p>
+            <div class="code-block">
+<pre>按下 Z
+  ↓
+Missile 飞行
+
+  情况 1：
+  1秒后自动爆炸
+
+  情况 2：
+  提前碰到 enemy
+    ↓
+  立即爆炸</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted);">到这里，导弹已经具备完整的自动销毁和命中爆炸功能。</p>
+        </div>
+
+        <!-- 完整 Missile.gd 参考 -->
+        <div class="content-card" style="background: #1e293b; border-left-color: #8b5cf6;">
+            <div class="section-title" style="color: #f1f5f9;">📦 完整 Missile.gd 参考</div>
+            <p style="color: #cbd5e1;">整合三个阶段的完整代码：</p>
+            <div class="code-block" style="background: #0f172a; color: #e2e8f0;">
+<pre style="color: #e2e8f0;">extends Area2D
+
+@export var explosion_scene: PackedScene
+
+var direction = Vector2.RIGHT
+var speed = 400
+
+func _physics_process(delta):
+    global_position += direction * speed * delta
+
+func explode():
+    var explosion = explosion_scene.instantiate()
+    explosion.global_position = global_position
+    get_parent().add_child(explosion)
+    queue_free()
+
+func _on_timer_timeout():
+    explode()
+
+func _on_body_entered(body):
+    if body.is_in_group("enemy"):
+        explode()</pre>
+            </div>
+        </div>
+
+        <!-- 老师注记 -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>body_entered vs area_entered：</strong>如果敌人是 CharacterBody2D / RigidBody2D，用 <code>body_entered</code>；如果敌人也是 Area2D，用 <code>area_entered</code>。</li>
+                <li><strong>Group 大小写敏感：</strong>再次强调，<code>is_in_group("enemy")</code> 中的字符串必须与编辑器 Groups 中填写的一致。</li>
+                <li><strong>explode() 复用：</strong>超时爆炸和碰撞爆炸都调用同一个 <code>explode()</code> 函数，代码复用性好，便于统一修改爆炸逻辑。</li>
+                <li><strong>后续扩展：</strong>可以在 <code>explode()</code> 中遍历爆炸范围内的所有 body，对敌人造成伤害，而不仅仅是销毁导弹。</li>
+            </ul>
+        </div>
+
+        <!-- 跳转回总览 -->
+        <div class="content-card" style="background: #f0fdf4; border-left-color: #22c55e; text-align: center;">
+            <p style="margin-bottom: 12px;">🎉 模块九完成！导弹系统已掌握：飞行 + 爆炸 + 命中检测</p>
+            <a href="module-9.html" class="back-nav" style="display: inline-block; padding: 12px 24px; background: #22c55e; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">← 返回模块九总览</a>
+        </div>
+
+    </div>
+</body>
+</html>

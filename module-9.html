@@ -79,6 +79,27 @@ Missile 飞行（direction * speed）
         <div class="content-card logic-card">
             <div class="section-title">⚙️ 操作步骤 Step by Step</div>
 
+            <p style="margin-bottom: 16px; color: var(--text-muted);">完整 22 步分三个子模块展开。点击进入子模块查看详细操作：</p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+                <a href="module-9-1.html" style="display: block; padding: 14px; background: white; border-radius: 8px; border-top: 4px solid #22c55e; text-decoration: none; color: inherit; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 12px; color: #22c55e; font-weight: bold; margin-bottom: 6px;">模块 9.1 · 步骤 1-10</div>
+                    <div style="font-weight: bold; margin-bottom: 4px;">实现 Missile 导弹飞行</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">创建场景、加节点、玩家发射、定时销毁</div>
+                </a>
+                <a href="module-9-2.html" style="display: block; padding: 14px; background: white; border-radius: 8px; border-top: 4px solid #ef4444; text-decoration: none; color: inherit; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 12px; color: #ef4444; font-weight: bold; margin-bottom: 6px;">模块 9.2 · 步骤 11-18</div>
+                    <div style="font-weight: bold; margin-bottom: 4px;">实现 Explosion 爆炸效果</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">创建爆炸场景、设置范围、自动清理</div>
+                </a>
+                <a href="module-9-3.html" style="display: block; padding: 14px; background: white; border-radius: 8px; border-top: 4px solid #8b5cf6; text-decoration: none; color: inherit; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="font-size: 12px; color: #8b5cf6; font-weight: bold; margin-bottom: 6px;">模块 9.3 · 步骤 19-22</div>
+                    <div style="font-weight: bold; margin-bottom: 4px;">碰到 enemy 提前爆炸</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">连接碰撞信号、检测 enemy 组、命中即爆</div>
+                </a>
+            </div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);">下面是浓缩版 6 步快速参考，详细步骤见上方子模块页。</p>
+
             <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>第一步：创建 Missile 场景</strong></p>
             <div class="code-block">
 <pre>1. 项目 → 场景 → 新建场景

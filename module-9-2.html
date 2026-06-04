@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块 9.2：实现 Explosion 爆炸效果</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="module-9.html" class="back-nav">← 返回模块九总览</a>
+
+        <div class="page-header">
+            <div class="module-tag" style="color: #ef4444; border-color: #ef4444;">模块 9.2</div>
+            <h1>💥 实现 Explosion 爆炸效果</h1>
+            <p>创建爆炸场景、设置范围、定时清理、修改 Missile 触发爆炸</p>
+        </div>
+
+        <!-- 目标 -->
+        <div class="content-card features-card" style="border-left-color: #ef4444;">
+            <div class="section-title">🎯 本节目标</div>
+            <ul class="feature-list">
+                <li>创建独立的 <code>Explosion.tscn</code> 场景</li>
+                <li>导弹 1 秒超时后生成爆炸</li>
+                <li>爆炸短暂存在后自动删除</li>
+                <li>Missile 负责飞行，Explosion 负责范围效果</li>
+            </ul>
+        </div>
+
+        <!-- 设计分离 -->
+        <div class="content-card" style="background: #fef3c7; border-left-color: #ef4444;">
+            <div class="section-title">🔧 设计分离</div>
+            <p style="margin-bottom: 12px;">把飞行逻辑和爆炸效果拆成两个场景，便于独立维护和复用：</p>
+            <ul class="feature-list">
+                <li><strong>Missile</strong> → 负责飞行</li>
+                <li><strong>Explosion</strong> → 负责爆炸范围效果</li>
+            </ul>
+        </div>
+
+        <!-- 节点树 -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 Explosion 节点树</div>
+            <p style="margin-bottom: 16px; color: var(--text-muted);">新建 <code>Explosion.tscn</code>：</p>
+            <div class="node-tree">
+                <span class="root">Explosion (Area2D)</span> <span class="note">（根节点：负责爆炸范围检测）</span>
+                <span class="child">├── Sprite2D</span> <span class="note">（显示爆炸图片）</span>
+                <span class="child">├── CollisionShape2D</span> <span class="note">（爆炸范围，圆形）</span>
+                <span class="child">└── Timer</span> <span class="note">（爆炸结束后自动删除）</span>
+            </div>
+        </div>
+
+        <!-- 操作步骤 -->
+        <div class="content-card logic-card" style="border-left-color: #ef4444;">
+            <div class="section-title">⚙️ 操作步骤 Step by Step</div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>步骤 11：创建 Explosion 场景</strong></p>
+            <ul class="feature-list">
+                <li>Scene 面板 → <strong>Other Node</strong> → <strong>Area2D</strong></li>
+                <li>重命名根节点为 <code>Explosion</code>，保存为 <code>Explosion.tscn</code></li>
+            </ul>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 12：添加子节点</strong></p>
+            <p>给 <code>Explosion (Area2D)</code> 添加三个子节点：</p>
+            <ul class="feature-list">
+                <li><strong>Sprite2D</strong> —— 显示爆炸图片</li>
+                <li><strong>CollisionShape2D</strong> —— 爆炸范围</li>
+                <li><strong>Timer</strong> —— 爆炸结束后自动删除</li>
+            </ul>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 13：设置爆炸范围</strong></p>
+            <p>选中 <code>CollisionShape2D</code>：</p>
+            <ul class="feature-list">
+                <li>Inspector → <strong>Shape</strong> → <strong>New CircleShape2D</strong></li>
+                <li>调整 <strong>Radius</strong> 控制爆炸范围大小。这个范围决定了爆炸能波及多远。</li>
+            </ul>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 14：设置 Explosion Timer</strong></p>
+            <div class="code-block">
+<pre>Wait Time  = 0.2
+One Shot   = 开启（☑）
+Autostart  = 开启（☑）</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted);">作用：爆炸短暂存在 0.2 秒后自动删除。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 15：连接 Explosion 信号</strong></p>
+            <p>先给 Explosion 添加一个空脚本（至少包含 <code>extends Area2D</code>），然后依次连接以下两个信号：</p>
+
+            <p style="margin-top: 12px;"><strong>15.1 连接 Timer 的 timeout 信号</strong></p>
+            <ul class="feature-list">
+                <li>选中 <code>Timer</code> 节点</li>
+                <li>切换到 <strong>Node</strong> 面板</li>
+                <li>找到 <strong>timeout</strong> 信号</li>
+                <li>双击或点击 <strong>Connect…</strong>，连接到 <code>Explosion.gd</code></li>
+            </ul>
+
+            <p style="margin-top: 12px;"><strong>15.2 连接 Area2D 的 body_entered 信号</strong></p>
+            <ul class="feature-list">
+                <li>选中 <code>Explosion (Area2D)</code> 根节点</li>
+                <li>切换到 <strong>Node</strong> 面板</li>
+                <li>找到 <strong>body_entered</strong> 信号</li>
+                <li>双击或点击 <strong>Connect…</strong>，连接到 <code>Explosion.gd</code></li>
+            </ul>
+            <p style="margin-top: 8px;">连接成功后，<code>Explosion.gd</code> 会自动生成空的 <code>_on_timer_timeout()</code> 和 <code>_on_body_entered(body)</code> 函数。</p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 16：补充 Explosion 脚本</strong></p>
+            <div class="code-block">
+<pre>extends Area2D
+
+func _on_body_entered(body):
+    if body.is_in_group("enemy"):
+        body.queue_free()       # 爆炸碰到敌人时销毁敌人
+
+func _on_timer_timeout():
+    queue_free()                # 0.2 秒后删除 Explosion 自身</pre>
+            </div>
+            <p style="margin-top: 8px;">作用：爆炸碰到敌人时销毁敌人，0.2 秒后删除 Explosion 自身。</p>
+            <p style="margin-top: 8px; color: #ef4444;">
+                ⚠️ <strong>检测不到？</strong>先检查 Collision Layer / Mask：Explosion 的 Mask 必须勾选敌人所在的层；敌人的 Layer 也要正确设置。两者对应上，<code>body_entered</code> 才能触发。
+            </p>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 17：修改 Missile 脚本（生成 Explosion）</strong></p>
+            <div class="code-block">
+<pre>extends Area2D
+
+@export var explosion_scene: PackedScene    # 在 Inspector 拖入 Explosion.tscn
+
+var direction = Vector2.RIGHT
+var speed = 400
+
+func _physics_process(delta):
+    global_position += direction * speed * delta
+
+func explode():
+    var explosion = explosion_scene.instantiate()
+    explosion.global_position = global_position
+    get_parent().add_child(explosion)
+    queue_free()
+
+func _on_timer_timeout():
+    explode()</pre>
+            </div>
+            <p style="margin-top: 12px;">流程变化：</p>
+            <div class="code-block">
+<pre>导弹飞行 → Timer 结束 → 调用 explode() → 实例化 Explosion → Missile 删除</pre>
+            </div>
+
+            <p style="margin: 16px 0 12px 0; color: var(--text-muted);"><strong>步骤 18：运行效果</strong></p>
+            <div class="code-block">
+<pre>按下 Z
+  ↓
+实例化 Missile
+  ↓
+导弹飞行
+  ↓
+1秒后触发爆炸
+  ↓
+生成 Explosion
+  ↓
+Explosion 自动消失</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted);">到这里，学生已经可以测试导弹爆炸效果。</p>
+        </div>
+
+        <!-- 老师注记 -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>explosion_scene 的赋值：</strong>在编辑器中选中 Missile，将 <code>Explosion.tscn</code> 拖到 Inspector 里的 <strong>Explosion Scene</strong> 属性中。</li>
+                <li><strong>get_parent().add_child(explosion)：</strong>爆炸也要加到 World 层，不能作为 Missile 的子节点，因为 Missile 马上会被删除。</li>
+                <li><strong>global_position 同步：</strong><code>explosion.global_position = global_position</code> 确保爆炸出现在导弹当前位置。</li>
+                <li><strong>queue_free() 顺序：</strong>先创建爆炸，再删除导弹，否则导弹位置信息会丢失。</li>
+            </ul>
+        </div>
+
+        <!-- 跳转下一节 -->
+        <div class="content-card" style="background: #fff8e6; border-left-color: #ef4444; text-align: center;">
+            <p style="margin-bottom: 12px;">💣 爆炸有了，但只会超时爆炸，碰到敌人不会提前炸</p>
+            <a href="module-9-3.html" class="back-nav" style="display: inline-block; padding: 12px 24px; background: #ef4444; color: white; border-radius: 8px; text-decoration: none; font-weight: bold;">下一节：9.3 碰到 enemy 提前爆炸 →</a>
+        </div>
+
+    </div>
+</body>
+</html>
