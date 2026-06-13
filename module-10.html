@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块十：世界暂停，菜单继续</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块十</div>
+            <h1>世界暂停，菜单继续</h1>
+            <p>升级选择、暂停菜单、装备界面、结算画面 —— 共享同一个"暂停 + 菜单"模式</p>
+        </div>
+
+        <!-- Features -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 核心概念 Concept</div>
+            <ul class="feature-list">
+                <li><strong>两套世界：</strong>游戏世界（玩家、敌人、子弹、计时器）暂停时要停；菜单世界（升级选择、暂停面板、装备界面）暂停时还要工作。</li>
+                <li><strong>全局开关：</strong><code>get_tree().paused = true / false</code> 一行代码控制整个游戏树暂停 / 恢复。</li>
+                <li><strong>白名单豁免：</strong>节点上的 <code>Process Mode = Always</code> 让该节点在暂停时仍然工作（UI 按钮、动画、计时都要这个）。</li>
+                <li><strong>分离的代价：</strong>用 CanvasLayer（module-8 已学）做菜单根节点，让 UI 永远在屏幕最上层，跟游戏世界不混在一起。</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--primary); font-weight: bold;">一句话：世界暂停，菜单继续。</p>
+        </div>
+
+        <!-- Node Tree -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 节点树构成 Node Tree</div>
+            <p style="color: var(--text-muted);">在 <code>Main</code> 场景中添加：</p>
+            <div class="node-tree">
+                <span class="root">Main（Node2D）</span>
+                <span class="child">├── World（Node2D）</span> <span class="note">（游戏世界：暂停时全停）</span>
+                <span class="child">│    ├── Player</span>
+                <span class="child">│    ├── Enemies</span>
+                <span class="child">│    └── Bullets</span>
+                <span class="child">├── HUDLayer（CanvasLayer）</span> <span class="note">（module-8 已学，HUD 显示）</span>
+                <span class="child">│    └── HUD</span>
+                <span class="child">└── UpgradeLayer（CanvasLayer）</span> <span class="note">（菜单世界：暂停时仍工作）</span>
+                <span class="child">     └── UpgradePanel</span> <span class="note" style="color: var(--primary); font-weight: bold;">（⚙️ Process Mode = Always）</span>
+                <span class="child">          ├── DimBackground（ColorRect）</span> <span class="note">（半透明遮罩）</span>
+                <span class="child">          ├── LeftBox（PanelContainer）</span>
+                <span class="child">          │    └── LeftButton（Button）</span>
+                <span class="child">          └── RightBox（PanelContainer）</span>
+                <span class="child">               └── RightButton（Button）</span>
+            </div>
+            <p style="margin-top: 16px; color: var(--primary); font-weight: bold;">⚠️ 关键：<code>UpgradePanel</code> 节点要设 Process Mode = Always（在 Inspector 顶部，**不是** CanvasLayer 上设）。</p>
+            <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.9em;">参考结构，不是唯一答案。Container 类型（PanelContainer / VBoxContainer / HBoxContainer）学员可自由组合。</p>
+        </div>
+
+        <!-- API Quick Reference -->
+        <div class="content-card logic-card">
+            <div class="section-title">⚙️ API 速查 Quick Reference</div>
+
+            <p style="margin-bottom: 12px; color: var(--text-muted);"><strong>暂停 / 恢复整个游戏</strong></p>
+            <div class="code-block">
+<pre># 暂停
+get_tree().paused = true
+
+# 恢复
+get_tree().paused = false
+
+# 切换（任意脚本里都能调）
+get_tree().paused = not get_tree().paused</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.9em;">⚠️ <code>get_tree()</code> 任何 Node 都有，返回的是 SceneTree（整棵游戏树）。</p>
+
+            <p style="margin: 24px 0 12px 0; color: var(--text-muted);"><strong>Process Mode 5 个值（节点属性，Inspector 顶部下拉）</strong></p>
+            <div class="code-block">
+<pre>INHERIT    （0）  默认：跟随父节点的设置
+PAUSABLE   （1）  跟随全局 paused（普通节点用这个）
+WHEN_PAUSED（2）  只在 paused 时跑（暂停菜单用这个）
+ALWAYS     （3）  不受 paused 影响（升级弹窗用这个）
+DISABLED   （4）  永远不跑（临时禁用）</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.9em;">⚠️ 在 Inspector 顶部下拉框选；脚本里用 <code>Node.PROCESS_MODE_ALWAYS</code> 等常量。</p>
+
+            <p style="margin: 24px 0 12px 0; color: var(--text-muted);"><strong>运行时改 Process Mode</strong></p>
+            <div class="code-block">
+<pre># 任何节点都可以在 _ready() 里设置
+func _ready():
+    process_mode = Node.PROCESS_MODE_ALWAYS</pre>
+            </div>
+        </div>
+
+        <!-- Migration to other menus -->
+        <div class="content-card" style="border-left-color: var(--accent);">
+            <div class="section-title">🧩 这个抽象可以迁移到</div>
+            <p style="color: var(--text-muted); margin-bottom: 12px;">「世界暂停 + 菜单继续」是模块 10 的核心模式，**不是**"只做升级选择"。所有"玩家要看 / 选 / 操作但游戏要停"的界面都用这套：</p>
+            <ul class="feature-list">
+                <li><strong>暂停菜单：</strong>玩家按 ESC → 暂停 → 显示"继续 / 退出"按钮 → 玩家选择 → 恢复或退出</li>
+                <li><strong>装备选择：</strong>在指定节点上拾取装备 → 暂停 → 弹出"换下/换上"对比 → 选择 → 恢复</li>
+                <li><strong>天赋加点：</strong>升级或关卡结束 → 暂停 → 显示天赋树 → 加点 → 恢复</li>
+                <li><strong>背包 / 商店：</strong>打开背包 → 暂停 → 拖拽物品 / 买 / 卖 → 关闭 → 恢复</li>
+                <li><strong>结算画面：</strong>玩家死亡或通关 → 暂停 → 显示本局结果 → 重开 / 返回主菜单</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--accent); font-weight: bold;">口诀：所有"游戏要停、玩家要做选择"的界面 = 同一个节点结构 + 同一个 Process Mode 设置。</p>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>Process Mode 设在哪一层？</strong>设 UpgradePanel 自己，不是 CanvasLayer。CanvasLayer 是 UI 容器，Process Mode 是"我是否受暂停影响"——两个不同维度。</li>
+                <li><strong>不要每个节点都设 Always：</strong>只需要菜单根节点 + 它的子节点会自动继承。子节点设 Inherit 即可。</li>
+                <li><strong>暂停时动画怎么办？</strong>如果升级弹窗想"淡入"动画 → 弹窗的子 AnimationPlayer 也得能跑。Container 类节点会继承 Process Mode，所以子节点不用单独设。</li>
+                <li><strong>暂停时 Timer 怎么办？</strong>Timer 默认是 Pausable，暂停时停。如果升级弹窗自己有倒计时（比如 10 秒不选就默认）→ Timer 也设 Always。</li>
+                <li><strong>不要一开始就塞太多功能：</strong>先做"杀 5 只升级、左右各一按钮"最小版。随机、三选、池子、Resource、Autoload 全部不引入，下一阶段再说。</li>
+            </ul>
+        </div>
+
+        <!-- Common Pitfalls -->
+        <div class="content-card" style="border-left-color: var(--secondary);">
+            <div class="section-title" style="color: var(--secondary);">⚠️ 常见坑点 Common Pitfalls</div>
+            <ul class="feature-list">
+                <li><strong>弹窗显示出来但按钮点不动：</strong>Process Mode 没设 ALWAYS（或只设了 CanvasLayer，没设 UpgradePanel）。</li>
+                <li><strong>暂停时敌人 / 子弹还在动：</strong>没调 <code>get_tree().paused = true</code>，只把弹窗 hide 了。检查：触发升级的代码里有没有这行。</li>
+                <li><strong>恢复后玩家"被推着走"：</strong>暂停期间玩家没动，恢复后 <code>move_and_slide()</code> 在暂停时不跑。但 Vector2 累积可能跳一帧——通常无害，知道就好。</li>
+                <li><strong>CanvasLayer 里 process_mode 设了 Always 但弹窗仍停：</strong>CanvasLayer 是 Node，不是 Control。它的 Process Mode 不控制子 Control 节点。每个 Control 节点（Button/Label）都从父 Control 继承——但根的 Control 要自己设 Always。</li>
+                <li><strong>多个弹窗叠在一起：</strong>在 Inspector 用 Visible 控制，不要用 <code>show()/hide()</code> 切场景。Hide 的节点不参与输入，但仍占内存。</li>
+            </ul>
+        </div>
+
+        <!-- Key concept -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">💡 核心概念</div>
+            <ul class="feature-list">
+                <li><strong>get_tree().paused = true</strong>：一行代码暂停整个游戏树</li>
+                <li><strong>Process Mode = Always</strong>：让 UI 节点在暂停时仍工作</li>
+                <li><strong>世界 vs 菜单</strong>：暂停时该停的 vs 暂停时该继续的 —— 升模块的核心抽象</li>
+                <li><strong>口诀：</strong>世界暂停，菜单继续</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

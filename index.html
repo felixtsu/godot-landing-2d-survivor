@@ -11,7 +11,7 @@
 
         <div class="index-header">
             <h1>🎮 Godot 战斗系统实践手册</h1>
-            <p class="subtitle">敌人 · 射击与战斗系统 · 九个模块 + Challenges 进阶练习</p>
+            <p class="subtitle">敌人 · 射击与战斗系统 · 十个模块 + Challenges 进阶练习</p>
         </div>
 
         <div class="module-grid">
@@ -78,6 +78,13 @@
                 <div class="arrow">→</div>
             </a>
 
+            <a href="module-10.html" class="module-card">
+                <div class="module-num">模块十</div>
+                <h2>世界暂停，菜单继续</h2>
+                <p>get_tree().paused 全局暂停游戏，节点 Process Mode = Always 让 UI 在暂停时仍可点击。升级选择 / 暂停菜单 / 装备界面都用这套模式。</p>
+                <div class="arrow">→</div>
+            </a>
+
             <a href="resources.html" class="module-card" style="border-top-color: #27ae60;">
                 <div class="module-num" style="color: #27ae60;">素材库</div>
                 <h2>共用素材库</h2>
@@ -113,6 +120,7 @@
                 <li>确保子弹发射时 <code>add_child</code> 到了 <strong>World</strong> 节点，而不是 Player 自己</li>
                 <li><strong>TileMapLayer 的 Physics Layer</strong> 没 Add Element 就画 = 墙壁穿人！</li>
                 <li><strong>Camera2D</strong> 要勾 Enabled 属性才能生效</li>
+                <li><strong>Process Mode = Always</strong> 节点上的属性在 Inspector 顶部，没设 = 暂停时 UI 也停</li>
             </ul>
         </div>
 
