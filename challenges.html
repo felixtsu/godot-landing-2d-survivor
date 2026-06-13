@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>附录：游戏增强建议</title>
+    <title>附录：游戏增强挑战</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,20 +11,220 @@
         <a href="index.html" class="back-nav">← 返回首页</a>
         <div class="page-header">
             <div class="module-tag">附录</div>
-            <h1>附录：游戏增强建议</h1>
-            <p>以下是可快速上手的玩法增强点，每条都能独立实现并逐步叠加。</p>
+            <h1>附录：游戏增强挑战</h1>
+            <p>每条挑战都是一个独立功能点。点击卡片翻面，查看"下一步可以想哪些问题"——把问题想清楚，代码就自然出来了。再点一下或点击空白处可关闭。</p>
         </div>
 
-        <div class="content-card features-card">
-            <div class="section-title">游戏增强建议</div>
+        <div class="challenge-grid">
+
+            <!-- 挑战 1：随机掉落装备 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">🎲 掉落</div>
+                        <h3 class="challenge-title">随机掉落装备</h3>
+                        <p class="challenge-desc">敌人被击败后有概率掉落道具，浮空展示，碰触即拾取。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>怎么判断"敌人被击败了"——是从 Bullet 那边发信号，还是 Enemy 自己发？</li>
+                            <li>"概率掉落"用什么机制实现？固定间隔、随机数、还是抽签？</li>
+                            <li>道具"浮空"是动画还是每帧手动改 position？</li>
+                            <li>碰触即拾取后，道具是 queue_free 吗？得分加在哪？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 2：短时无敌护盾 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">🛡️ 护盾</div>
+                        <h3 class="challenge-title">短时无敌护盾</h3>
+                        <p class="challenge-desc">角色受伤后 1-2 秒无敌，闪烁反馈保护时间。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>"无敌"在玩家身上是个什么状态？用变量还是用节点？</li>
+                            <li>1-2 秒的倒计时，用 Timer 还是 process 里减法？</li>
+                            <li>闪烁效果怎么写？是改 Sprite2D 的 modulate 还是 visible？</li>
+                            <li>这段时间里敌人碰到玩家，是直接不触发，还是触发了但 player 忽略？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 3：追踪子弹 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">🎯 追踪</div>
+                        <h3 class="challenge-title">追踪子弹</h3>
+                        <p class="challenge-desc">子弹发射后持续朝最近敌人修正方向，画出可见的追踪曲线。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>"每帧修正方向"和"发射时锁定方向"的核心区别是什么？</li>
+                            <li>找最近敌人是写在 Player 还是写在 Bullet 里？</li>
+                            <li>如果中途目标敌人死了，子弹往哪飞？原地、还是找下一个？</li>
+                            <li>追踪太"硬"了不真实——要不要给一个最大转向角度？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 4：双持武器 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">🔫 双持</div>
+                        <h3 class="challenge-title">双持武器</h3>
+                        <p class="challenge-desc">每次攻击同步射出两颗不同方向的子弹，扩大清怪范围。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>两颗子弹是"用同一个发射函数发两次"还是"循环里发"？</li>
+                            <li>不同方向是 ±15° 散开、上下左右四方向、还是别的？</li>
+                            <li>两颗子弹需要两个 Marker2D 作为发射点吗？</li>
+                            <li>这样做会不会让游戏变简单很多？怎么平衡？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 5：敌人波次加速 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">⏱️ 加速</div>
+                        <h3 class="challenge-title">敌人波次加速</h3>
+                        <p class="challenge-desc">随波次推进逐步缩短生成间隔，节奏持续变快。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>"波次"是怎么定义的？固定时间、还是杀 N 只后切换？</li>
+                            <li>缩短间隔是改 Timer 的 wait_time，还是让 Spawner 内部变量递减？</li>
+                            <li>会不会快到游戏卡死？最低间隔设多少合适？</li>
+                            <li>玩家扛不住了有没有"喘息"机制？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 6：屏幕震动 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">📳 震动</div>
+                        <h3 class="challenge-title">屏幕震动</h3>
+                        <p class="challenge-desc">爆炸或 Boss 出现时镜头震动，增强冲击力。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>震动是 Camera2D 抖，还是整个 World 抖？</li>
+                            <li>"抖"是加随机 offset 还是用 Tween？</li>
+                            <li>震多久？0.2 秒？0.5 秒？</li>
+                            <li>怎么从 Explosion 那边"通知" Camera 抖？信号？全局变量？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 7：击退效果 -->
+            <div class="challenge-card">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag">💥 击退</div>
+                        <h3 class="challenge-title">击退效果</h3>
+                        <p class="challenge-desc">子弹命中敌人时附带短暂推离位移，强化打击反馈。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>击退的"方向"从哪里来？子弹方向？玩家到敌人的方向？</li>
+                            <li>击退是 Enemy 自己处理，还是 Bullet 那边"推"它？</li>
+                            <li>推多少？瞬移还是带过程？</li>
+                            <li>如果敌人正在追踪玩家，两个速度怎么合成？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 挑战 8（新）：打怪 → 升级 → 二选一 buff 框 -->
+            <div class="challenge-card challenge-card-new">
+                <div class="challenge-inner">
+                    <div class="challenge-face challenge-front">
+                        <div class="challenge-tag challenge-tag-new">✨ NEW</div>
+                        <h3 class="challenge-title">打怪升级 + 二选一 buff</h3>
+                        <p class="challenge-desc">杀怪累计经验 → 升级弹出选择框 → 二选一获得永久 buff。</p>
+                        <div class="challenge-hint-tip">点击卡片 → 查看思考起点</div>
+                    </div>
+                    <div class="challenge-face challenge-back">
+                        <div class="challenge-hint-title">思考起点</div>
+                        <ul class="challenge-hint-list">
+                            <li>「杀了几只怪」用什么记录？用 score（已有）还是新增一个 kill_count？两者合并还是分开？</li>
+                            <li>升级的时候玩家要"停下来选 buff"吗？怎么让游戏暂停——get_tree().paused？</li>
+                            <li>二选一弹窗的 UI 怎么搭？CanvasLayer + 两个 Button？还是别的？按钮放哪、怎么固定不随相机动？</li>
+                            <li>两个 buff 从哪里来？写死两个？还是从一个池子里随机抽？池子怎么定义——数组？字典？</li>
+                            <li>buff 怎么"应用"到玩家身上？是改 player.speed、player.bullet_speed、还是 player 里的某个变量？怎么让 buff 持久生效？</li>
+                            <li>buff 之间会不会"互斥"或"叠加"？比如同时选"子弹变多"+"子弹变大"，子弹该多大？</li>
+                            <li>升级时游戏要不要给个"反馈"？屏幕闪一下？播个音效？敌人暂停几秒？</li>
+                            <li>如果做完上面这些，怎么让游戏"无限持续"下去？</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+        (function(){
+            document.querySelectorAll('.challenge-card').forEach(function(card){
+                // 点击卡片任何位置都能切换正/反面
+                card.addEventListener('click', function(){
+                    card.classList.toggle('is-flipped');
+                });
+                // 键盘可达性：Enter / Space 也能翻
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.addEventListener('keydown', function(e){
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        card.classList.toggle('is-flipped');
+                    }
+                });
+            });
+            // 点击页面其他位置（不在卡片上）→ 关闭所有翻面的卡片
+            document.addEventListener('click', function(e){
+                if (!e.target.closest('.challenge-card')) {
+                    document.querySelectorAll('.challenge-card.is-flipped').forEach(function(c){
+                        c.classList.remove('is-flipped');
+                    });
+                }
+            });
+        })();
+        </script>
+
+        <div class="teacher-note" style="margin-top: 40px;">
+            <div class="section-title">📌 老师注记</div>
             <ul class="feature-list">
-                <li><strong>随机掉落装备：</strong>敌人被击败后有概率掉落道具，浮空展示并在玩家碰触时立即拾取。</li>
-                <li><strong>短时无敌护盾：</strong>角色受伤后进入 1-2 秒无敌状态，并用闪烁效果明确反馈保护时间。</li>
-                <li><strong>追踪子弹：</strong>子弹发射后持续朝最近敌人修正方向，实现可见的追踪曲线而非直线飞行。</li>
-                <li><strong>双持武器：</strong>每次攻击同步射出两颗不同方向的子弹，提升覆盖范围和清怪效率。</li>
-                <li><strong>敌人波次加速：</strong>随着波次推进逐步缩短生成间隔，让节奏持续变快并提高紧张感。</li>
-                <li><strong>屏幕震动：</strong>在爆炸或 Boss 出现等关键时刻触发镜头震动，增强冲击力和临场感。</li>
-                <li><strong>击退效果：</strong>子弹命中敌人时附带短暂推离位移，帮助玩家制造安全空间并强化打击反馈。</li>
+                <li><strong>卡片翻面是给你「想清楚下一步」用的：</strong>不写代码也不给答案——把问题想明白，自然知道怎么做。</li>
+                <li><strong>想不出来再展开看：</strong>先凭直觉试 10 分钟，实在卡了再翻面看 hint 提示方向。</li>
+                <li><strong>hint 看完后要合上：</strong>不要一边看 hint 一边写代码——看完合上，自己从零想一遍。</li>
             </ul>
         </div>
     </div>
