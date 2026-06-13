@@ -347,6 +347,21 @@ body {
     margin-bottom: 6px;
 }
 
+.faq-card {
+    margin-bottom: 24px;
+    border-left-color: var(--secondary);
+}
+
+.faq-card a {
+    color: var(--secondary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.faq-card a:hover {
+    text-decoration: underline;
+}
+
 /* === Animations === */
 @keyframes fadeInUp {
     from {
