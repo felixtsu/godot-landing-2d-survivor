@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块十一：UI 布局——自己组合，而不是照抄</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+
+        <a href="index.html" class="back-nav">← 返回首页</a>
+
+        <div class="page-header">
+            <div class="module-tag">模块十一</div>
+            <h1>UI 布局：自己组合，而不是照抄</h1>
+            <p>Container、Button、锚点与 Full Rect —— 学会「积木」，就能搭出任意界面</p>
+        </div>
+
+        <!-- Philosophy -->
+        <div class="content-card features-card">
+            <div class="section-title">📋 这节在教什么 Concept</div>
+            <ul class="feature-list">
+                <li><strong>不是 SOP：</strong>本模块<strong>不会</strong>给你一份「升级菜单节点树照着搭」的流水线步骤。那样只会操作，不会设计。</li>
+                <li><strong>是积木盒：</strong>Godot UI 由少数几种<strong>积木</strong>组成。你学会每块积木「管什么」，就能自己组合出暂停菜单、结算画面、商店、HUD……</li>
+                <li><strong>先想再搭：</strong>打开场景树之前，先回答三个问题——<em>要铺满屏幕吗？要横排还是竖排？要居中吗？</em></li>
+                <li><strong>前置知识：</strong>CanvasLayer（module-8）——UI 要挂在独立的 GUI 层，不跟 Player 一起走。</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--primary); font-weight: bold;">一句话：UI 不是背节点树，是选积木、排积木。</p>
+        </div>
+
+        <!-- Two families -->
+        <div class="content-card logic-card">
+            <div class="section-title">🧱 两类控件：普通 Control vs Container</div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">所有 UI 节点都继承自 <code>Control</code>。但要先分清两类——它们的「管孩子方式」完全不同。</p>
+
+            <p style="margin-bottom: 8px; color: var(--text-muted);"><strong>普通 Control</strong>（自己管自己，不管孩子怎么排）</p>
+            <div class="code-block">
+<pre>ColorRect     色块 / 半透明遮罩
+Button        可点击按钮
+Label         文字
+TextureRect   图片</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.9em;">子节点挂在它们下面时，<strong>不会自动排版</strong>——要靠锚点（anchors）和 offset 手动定位。</p>
+
+            <p style="margin: 24px 0 8px 0; color: var(--text-muted);"><strong>Container</strong>（会帮子节点排版）</p>
+            <div class="code-block">
+<pre>HBoxContainer     把孩子横着排成一行 →
+VBoxContainer     把孩子竖着排成一列 ↓
+CenterContainer   把<strong>一个</strong>孩子放到正中央 ⊙
+PanelContainer    给孩子加边框 / 背景，再包住内容
+MarginContainer   给孩子四周加留白边距</pre>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.9em;">Container 的子节点<strong>不要用锚点手动摆</strong>——父容器会按自己的规则安排位置和大小。</p>
+
+            <p style="margin-top: 16px; color: var(--primary); font-weight: bold;">判断法则：这个节点需要「帮孩子们排队」吗？要 → Container；只是画颜色 / 显示文字 → 普通 Control。</p>
+        </div>
+
+        <!-- Button -->
+        <div class="content-card">
+            <div class="section-title">🔘 Button：交互积木</div>
+            <ul class="feature-list">
+                <li><strong>干什么：</strong>显示一段文字（或图标），等玩家点击。点击时发出 <code>pressed</code> 信号。</li>
+                <li><strong>Text：</strong>按钮上显示什么——「继续」「移速 +20%」「退出」。</li>
+                <li><strong>Custom Minimum Size：</strong>按钮至少多大。不设的话，按钮会缩成一个小点，看起来像「布局坏了」。</li>
+                <li><strong>Size Flags：</strong>在 Container 里「要不要抢多余空间」。默认不抢；做弹簧占位时才勾 Expand。</li>
+                <li><strong>信号：</strong>在 Node 面板把 <code>pressed</code> 连到脚本，或在代码里 <code>button.pressed.connect(func)</code>。</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--text-muted); font-size: 0.9em;">Button 自己不会居中、不会横排——这些交给外面的 Container 做。</p>
+        </div>
+
+        <!-- Containers in detail -->
+        <div class="content-card tree-card">
+            <div class="section-title">📦 常用 Container 详解</div>
+
+            <p style="margin-bottom: 8px; color: var(--text-muted);"><strong>HBoxContainer</strong>——横向一排</p>
+            <ul class="feature-list">
+                <li>子节点从左到右排成一行。</li>
+                <li><strong>Separation</strong>：两个孩子之间的间距（像素）。</li>
+                <li><strong>Alignment</strong>：在这一行的<strong>垂直方向</strong>怎么对齐（Begin / Center / End）。</li>
+                <li>适合：左右两个选项、一排技能图标、「取消 | 确认」。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>VBoxContainer</strong>——纵向一列</p>
+            <ul class="feature-list">
+                <li>子节点从上到下排成一列。</li>
+                <li><strong>Separation</strong>：上下间距。</li>
+                <li><strong>Alignment</strong>：在这一列的<strong>水平方向</strong>怎么对齐。</li>
+                <li>适合：暂停菜单「继续 / 设置 / 退出」、结算画面的标题 + 分数 + 按钮。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>CenterContainer</strong>——正中放一个</p>
+            <ul class="feature-list">
+                <li>只擅长居中<strong>一个孩子</strong>（通常再套 HBox 或 VBox 放多个元素）。</li>
+                <li>自己需要足够大（通常 Full Rect 铺满父节点），才有「大的中央」可以放东西。</li>
+                <li>适合：弹窗整体居中、标题居中、单个对话框。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>PanelContainer</strong>——加框 / 底</p>
+            <ul class="feature-list">
+                <li>不改变排列方向，只给孩子加主题边框和背景，让选项看起来像「卡片」。</li>
+                <li>常套在 Button 外面：PanelContainer → Button。</li>
+                <li>适合：升级选项卡、物品格子、带边框的按钮组。</li>
+            </ul>
+        </div>
+
+        <!-- Full Rect & Anchors -->
+        <div class="content-card logic-card">
+            <div class="section-title">📐 Full Rect 与锚点：铺满屏幕</div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">很多 UI 需求的第一步是：<strong>这个节点要盖住整个屏幕（或整个父区域）吗？</strong> 要 → Full Rect。</p>
+
+            <p style="margin-bottom: 8px; color: var(--text-muted);"><strong>锚点是什么</strong></p>
+            <ul class="feature-list">
+                <li>锚点定义控件的四条边「粘在父节点的哪条比例位置」。</li>
+                <li>Left=0, Top=0, Right=1, Bottom=1 → 四边贴满父节点 = <strong>Full Rect</strong>。</li>
+                <li>Offset 是锚点定好之后的微调边距（通常全 0）。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>Godot 4 里怎么设 Full Rect</strong></p>
+            <ul class="feature-list">
+                <li><strong>2D 视图顶部工具栏</strong> → Layout 按钮（格子图标）→ Full Rect。</li>
+                <li>或右键节点 → Layout → Full Rect。</li>
+                <li>或 Inspector → Control → Layout → 手动填 Anchor 0, 0, 1, 1，Offset 全 0。</li>
+            </ul>
+
+            <p style="margin-top: 12px; color: var(--secondary); font-weight: bold;">⚠️ Inspector 里经常看不到「Anchors Preset」按钮——这是 Godot 4 的正常现象，去 2D 视图顶部的 Layout 菜单找。</p>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>三种 Layout Mode（Inspector → Layout）</strong></p>
+            <div class="code-block">
+<pre>Position   用手动坐标 (offset_left / offset_top …) 定位
+Anchors    用锚点 + offset 定位（设 Full Rect 用这个）
+Container  父 Container 托管大小——作为 Container 的子节点时自动切换</pre>
+            </div>
+
+            <p style="margin-top: 12px; color: var(--text-muted); font-size: 0.9em;">作为 Container 的子节点时，没有锚点预设——大小由父容器决定。作为 ColorRect 的子节点时，是普通 Control，要用 Anchors 或 2D 视图拖矩形。</p>
+        </div>
+
+        <!-- ColorRect -->
+        <div class="content-card">
+            <div class="section-title">🌫️ ColorRect：遮罩，不是排版器</div>
+            <ul class="feature-list">
+                <li><strong>干什么：</strong>画一块纯色矩形。调 <code>Color</code> 的 Alpha 透明度 → 半透明暗色遮罩。</li>
+                <li><strong>常见用法：</strong>弹窗后面的「变暗背景」，通常设 Full Rect 铺满屏幕。</li>
+                <li><strong>它不是 Container：</strong>挂在 ColorRect 下的孩子<strong>不会自动居中或横排</strong>——还得靠 CenterContainer / HBoxContainer 等。</li>
+                <li><strong>结构建议：</strong>遮罩和菜单内容可以是<strong>兄弟节点</strong>（都挂在 CanvasLayer 下），不必把所有东西塞进 ColorRect 里面。这样少踩「child of regular control」的坑。</li>
+            </ul>
+        </div>
+
+        <!-- Composition recipes -->
+        <div class="content-card" style="border-left-color: var(--accent);">
+            <div class="section-title">🧩 组合思路：需求 → 积木（不是标准答案）</div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">下面不是「唯一正确节点树」，而是<strong>设计推理</strong>——你可以换顺序、换 Container 类型，只要达到同样的视觉效果。</p>
+
+            <p style="margin-bottom: 8px; color: var(--text-muted);"><strong>需求 A：全屏变暗 + 屏幕正中左右两个大按钮</strong></p>
+            <ul class="feature-list">
+                <li>要铺满？→ ColorRect，Full Rect，半透明。</li>
+                <li>要正中？→ CenterContainer，Full Rect。</li>
+                <li>要横排两个？→ CenterContainer 里放一个 HBoxContainer，Separation 拉开间距。</li>
+                <li>要卡片感？→ 每个 Button 外套 PanelContainer。</li>
+                <li>按钮太小？→ 给 Button 设 Custom Minimum Size。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>需求 B：屏幕正中竖着三个按钮（暂停菜单）</strong></p>
+            <ul class="feature-list">
+                <li>遮罩同上。</li>
+                <li>CenterContainer → <strong>VBoxContainer</strong>（不是 HBox）→ 三个 Button。</li>
+                <li>VBox 的 Separation 控制按钮间距。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>需求 C：分数在左上角（HUD）</strong></p>
+            <ul class="feature-list">
+                <li>不需要 CenterContainer。</li>
+                <li>CanvasLayer 下直接放 Label，锚点设左上角（Top Left），offset 留一点边距。</li>
+                <li>HUD 通常不需要 Full Rect——只占一小块。</li>
+            </ul>
+
+            <p style="margin: 20px 0 8px 0; color: var(--text-muted);"><strong>需求 D：一行内容水平居中，但不用 CenterContainer</strong></p>
+            <ul class="feature-list">
+                <li>HBoxContainer 设 Full Rect，Alignment = Center（垂直居中）。</li>
+                <li>左右各放一个空的 Control，勾 Horizontal Expand → 当<strong>弹簧</strong>，把中间内容挤到水平正中。</li>
+            </ul>
+
+            <p style="margin-top: 16px; color: var(--accent); font-weight: bold;">口诀：先拆需求（铺满？居中？横排？竖排？），再选积木，最后想嵌套顺序。</p>
+        </div>
+
+        <!-- Design worksheet -->
+        <div class="content-card features-card">
+            <div class="section-title">✏️ 动手前：问自己这 5 个问题</div>
+            <p style="color: var(--text-muted); margin-bottom: 12px;">搭任何界面前，在纸上或脑子里回答完再打开 Godot——比照着别人的节点树抄快得多。</p>
+            <ol class="feature-list" style="list-style: decimal; padding-left: 24px;">
+                <li style="margin-bottom: 8px;"><strong>根节点放哪？</strong> → CanvasLayer（module-8），跟 Player 同级。</li>
+                <li style="margin-bottom: 8px;"><strong>要不要盖住全屏？</strong> → 要：ColorRect + Full Rect；不要：Label / 小 Panel 锚角落即可。</li>
+                <li style="margin-bottom: 8px;"><strong>主要内容横排还是竖排？</strong> → HBox 或 VBox。</li>
+                <li style="margin-bottom: 8px;"><strong>整体要不要在屏幕正中？</strong> → CenterContainer（或 HBox + 弹簧）。</li>
+                <li style="margin-bottom: 8px;"><strong>每个可点击区域多大？</strong> → Button 的 Custom Minimum Size + 可选 PanelContainer 包一层。</li>
+            </ol>
+        </div>
+
+        <!-- Nesting rules -->
+        <div class="content-card tree-card">
+            <div class="section-title">🌲 嵌套规则 Cheat Sheet</div>
+            <div class="node-tree">
+                <span class="root">CanvasLayer</span> <span class="note">（GUI 根，不随相机动）</span>
+                <span class="child">├── ColorRect（遮罩）</span> <span class="note">Full Rect · 只管画颜色，不管排版</span>
+                <span class="child">└── CenterContainer</span> <span class="note">Full Rect · 把下一个孩子居中</span>
+                <span class="child">     └── HBoxContainer 或 VBoxContainer</span> <span class="note">真正排按钮的地方</span>
+                <span class="child">          ├── PanelContainer → Button</span>
+                <span class="child">          └── PanelContainer → Button</span>
+            </div>
+            <p style="margin-top: 16px; color: var(--text-muted); font-size: 0.9em;">↑ 这是一种常见组合，<strong>不是标准答案</strong>。你也可以把 CenterContainer 和 ColorRect 做成兄弟节点，或省略 PanelContainer，或用 MarginContainer 加边距——能跑、好看、你讲得清为什么这样搭，就是好设计。</p>
+        </div>
+
+        <!-- Common Pitfalls -->
+        <div class="content-card" style="border-left-color: var(--secondary);">
+            <div class="section-title" style="color: var(--secondary);">⚠️ 布局常见坑点</div>
+            <ul class="feature-list">
+                <li><strong>按钮缩成小点：</strong>没设 Custom Minimum Size，也没设 Text。</li>
+                <li><strong>菜单挤在左上角：</strong>遮罩或 CenterContainer 没 Full Rect；或父节点本身只有 40×40 大。</li>
+                <li><strong>Inspector 找不到 Anchors Preset：</strong>去 2D 视图顶部 Layout；或父节点是 Container 时子节点本来就没有预设。</li>
+                <li><strong>「child of a regular control」蓝字提示：</strong>节点挂在 ColorRect 等普通 Control 下，要用锚点定位，不能指望父节点帮你排版。</li>
+                <li><strong>CenterContainer 里塞了三个 Button：</strong>CenterContainer 只居中<strong>一个孩子</strong>；多个 Button 要先包进 HBox / VBox，再把 HBox 作为 CenterContainer 的唯一子节点。</li>
+                <li><strong>HBox 设了 Full Rect 但内容还在左边：</strong>HBox 默认把孩子靠左排；要水平居中整组 → 加 CenterContainer，或用左右弹簧 Control。</li>
+                <li><strong>UI 跟着玩家跑：</strong>CanvasLayer 错挂成 Player 的子节点（module-8 反面教材）。</li>
+                <li><strong>代码里写 <code>size = Vector2(1280, 720)</code>：</strong>换分辨率就歪；优先用锚点 Full Rect，别硬编码像素。</li>
+            </ul>
+        </div>
+
+        <!-- Teacher Note -->
+        <div class="teacher-note">
+            <div class="section-title">📌 老师注记</div>
+            <ul class="feature-list">
+                <li><strong>别课上念节点树：</strong>让学生先画草图（遮罩 / 居中 / 横排），再打开 Godot 选 Container。讲评时问「你为什么用 HBox 而不是 VBox」，而不是「你节点名跟讲义不一样」。</li>
+                <li><strong>模块 10 + 模块 11 分工：</strong>模块 10 管「暂停时 UI 还能点」；模块 11 管「UI 长什么样、怎么排」。可以分开教，也可以交叉引用。</li>
+                <li><strong>验收标准：</strong>学生能口头解释每层 Container 的职责；界面在 1280×720 下居中可读；按钮能点。不要求与讲义节点树一致。</li>
+                <li><strong>进阶但不必修：</strong>MarginContainer、GridContainer、Size Flags 弹簧、Theme 换肤——会了 HBox/VBox/Center 已够做升级菜单和暂停菜单。</li>
+                <li><strong>实操建议：</strong>先搭「空壳 UI」（只有色块和按钮文字），跑通布局和点击，再接 module-10 的 paused 和 buff 逻辑。</li>
+            </ul>
+        </div>
+
+        <!-- Self practice -->
+        <div class="content-card" style="border-left-color: var(--primary);">
+            <div class="section-title">💡 练手：用积木自由搭（无标准答案）</div>
+            <p style="color: var(--text-muted); margin-bottom: 12px;">下面每题只描述<strong>视觉效果</strong>，不给出节点树。搭完后对照「练手自检」。</p>
+            <ul class="feature-list">
+                <li><strong>练习 1：</strong>半透明遮罩 + 屏幕正中央一个写着「继续游戏」的大按钮。</li>
+                <li><strong>练习 2：</strong>同上遮罩 + 正中央<strong>横排</strong>两个选项：「移速 ↑」「射速 ↑」，中间有明显间距。</li>
+                <li><strong>练习 3：</strong>无遮罩，左上角显示「Score: 0」，不挡游戏画面。</li>
+                <li><strong>练习 4：</strong>正中央<strong>竖排</strong>三个按钮：「继续」「设置」「退出」。</li>
+            </ul>
+            <p style="margin-top: 16px; color: var(--text-muted);"><strong>练手自检（搭完逐条打勾）：</strong></p>
+            <ul class="feature-list">
+                <li>换窗口大小时，遮罩仍铺满？（用了锚点而不是写死 size）</li>
+                <li>按钮大小够点、文字看得见？</li>
+                <li>能说出每一层 Container「负责哪一件事」？</li>
+                <li>删掉某一层，布局会怎么坏？（说明你真的理解嵌套）</li>
+            </ul>
+            <p style="margin-top: 12px; color: var(--primary); font-weight: bold;">搭得像不像讲义不重要；讲得清「为什么这样排」才重要。</p>
+        </div>
+
+        <!-- Link to module 10 -->
+        <div class="content-card">
+            <div class="section-title">🔗 和模块十怎么配合</div>
+            <ul class="feature-list">
+                <li><strong>模块 11（本页）：</strong>UI <em>长什么样</em>——Container、锚点、Button 尺寸。</li>
+                <li><strong>模块 10：</strong>UI <em>什么时候出现、暂停时能不能点</em>——<code>paused</code>、Process Mode。</li>
+                <li>推荐顺序：先用本模块搭好界面壳子 → 再用模块 10 接暂停和选择逻辑。别还没看清按钮在哪就开始写 <code>get_tree().paused</code>。</li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>
