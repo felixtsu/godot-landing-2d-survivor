@@ -1,54 +1,71 @@
-# 模块十二：3D 入门 — 从 2D 出发（给 cheatsheet 作者的 plan）
+# 模块十二：3D 入门 — 从 2D 出发
 
-> **目标学生**：2D topdown survivor 毕业生（已掌握 CharacterBody2D / Area2D / Timer / Camera2D / 信号 / process_mode / CanvasLayer）
-> **课程定位**：最小 increment 进入 3D；不重讲 3D 概念，迁移已有经验
-> **总课时**：3 节 × 2h（第四节可选）
-
----
-
-## 核心迁移思路
-
-| 你已经会的 2D | 3D 版本是这样 | 关键区别 |
-|---|---|---|
-| Node2D | Node3D | 多 Z 轴；rotation 是 Vector3 |
-| Sprite2D | MeshInstance3D | 用网格模型而不是贴图 |
-| Camera2D | Camera3D | 有 near/far/FOV；`look_at(target, up)` |
-| CharacterBody2D | CharacterBody3D | `move_and_slide()` 参数略有不同 |
-| Area2D | Area3D | 3D 碰撞体形状（BoxShape3D / SphereShape3D）|
-| `area_entered` 信号 | `body_entered` 信号（Area3D 上）| 3D 场景用 body |
-| `Input.get_vector(...)` | **完全一样** | 键盘映射不变 |
-| `add_child(node)` | **完全一样** | 动态创建节点不变 |
-| `queue_free()` | **完全一样** | 节点销毁不变 |
+> **目标学生**：2D topdown survivor 毕业生（已掌握 `CharacterBody2D` / `Area2D` / `Timer` / `Camera2D` / 信号 / `process_mode` / `CanvasLayer`）
+> **课程定位**：**最小 increment 进入 3D**；不重讲 3D 概念，迁移已有经验
+> **总课时**：3 节 × 2h（**必上**）+ 第 4 节 × 2h（**可选**）
+> **配套 lesson plan**：`projects/godot-landing-ppt/3d-onboarding/outline.md`（老师用的内部文档）
 
 ---
 
-## 第 1 节：3D 节点 + 空场景跑起来
+## 为什么这节从 2D 进 3D，而不是从零讲 3D
 
-### 节点树
-```
-Main（Node3D）
-├── MeshInstance3D（Cube，Position 0,0,0）  ← 代替 Sprite2D
-├── DirectionalLight3D  ← 3D 必加：照亮场景
-└── Camera3D（Position 0,5,10，Look At 0,0,0） ← 代替 Camera2D
-```
+3D 入门**不是**一门新课。Godot 4 的 3D 子系统和 2D 子系统**共享同一套核心概念**（节点、信号、_process、_physics_process、add_child、queue_free、preload、instantiate）。学生**不是**零基础；他们只是**第一次看 3D 视角的 Godot**。
 
-### 重点 API
+**核心论点**：
 
-**MeshInstance3D**
-- `Mesh` 属性 → `New BoxMesh` / `New SphereMesh`（选一个）
-- 调颜色：Inspector → Material → 新建 `StandardMaterial3D` → `Albedo Color`
+> **3D 入门 = 把 2D 经验搬到 3D 节点上**。Node2D → Node3D、CharacterBody2D → CharacterBody3D、Area2D → Area3D。**逻辑、API、思维方式全部不变**；唯一变的是节点的"3D 版本"长什么样、能做什么。
 
-**DirectionalLight3D**
-- `Shadow Enabled` = ON（打开阴影，更有立体感）
-- `Light Color` 调暖白或日光色
+**本模块做的事**：
 
-**Camera3D**
-- `Projection`：Perspective（透视）= 真实感；Orthogonal = 2D 感（本节用 Perspective）
-- `FOV`：默认 75，越大越像鱼眼（新手建议 60）
-- `Look At`：点击目标节点，让相机盯着它
-- 快捷键：选中相机 → View → "Look From Here" 手动拖动相机到想要位置
+1. 3 节 × 2h = **6 小时**（2D 入门用了 11 节 × 2h = 22 小时；3D 入门是"用 6 小时验证你已经会的技能可以迁移"）
+2. 4 节 X 2h（可选）= **完整 3D 版 topdown survivor mini demo**
 
-### 相机绕立方体转（一行代码）
+**本模块不做的事**：
+
+- ❌ 不重讲 3D 数学（向量、矩阵、变换——前置物理课学过）
+- ❌ 不重讲 3D 美术（建模、贴图、骨骼——下学期 / 进阶班的事）
+- ❌ 不从零讲 Godot UI / 信号 / Timer——module-1~11 已经讲过
+
+---
+
+## 2D → 3D 节点对照表（**核心**）
+
+| 你已经会的 2D | 3D 版本是这样 | 关键差异 | 用法示例 |
+|---|---|---|---|
+| `Node2D` | `Node3D` | 多一个 Z 轴；`position` 是 `Vector3`（x/y/z）| `position = Vector3(0, 0, 5)` |
+| `Sprite2D` | `MeshInstance3D` | 用 `Mesh`（BoxMesh / SphereMesh）而不是贴图精灵 | `Inspector → Mesh → New BoxMesh` |
+| `Camera2D` | `Camera3D` | 有 `FOV` / `near` / `far` / `Projection`（Perspective / Orthogonal）| `camera.look_at(target, Vector3.UP)` |
+| `CharacterBody2D` | `CharacterBody3D` | `velocity` 变 `Vector3`；`move_and_slide()` 一样 | `velocity = Vector3(input.x, 0, input.y) * speed` |
+| `Area2D` | `Area3D` | 信号从 `area_entered` 变成 **`body_entered`**（**关键差异**）| `_on_body_entered(body): if body.is_in_group("bullet")` |
+| `CollisionShape2D` + `RectangleShape2D` | `CollisionShape3D` + `BoxShape3D` / `SphereShape3D` | **必须用 3D 形状**（2D 形状在 3D 场景里不工作）| `Shape → New BoxShape3D` |
+| `Marker2D` | `Marker3D` | 几乎一样（3D 多了 `transform.basis` 旋转信息）| 用作子弹出生点 / 生成点 |
+| `Timer` | `Timer` | **完全一样**——`wait_time` / `autostart` / `timeout` 信号 | `Timer` + `_on_spawn_timer_timeout()` |
+| `CanvasLayer` | `CanvasLayer` | **完全一样**——永远在最上层，2D UI 叠加 3D 场景 | 升级菜单、HUD 都可以 |
+| `Input.get_vector("left", "right", "up", "down")` | `Input.get_vector("left", "right", "up", "down")` | **完全一样**——键盘映射不变 | `var input_dir = Input.get_vector(...)` |
+| `add_child(node)` | `add_child(node)` | **完全一样** | `add_child(bullet_instance)` |
+| `queue_free()` | `queue_free()` | **完全一样** | `queue_free()` |
+| `preload("res://x.tscn")` + `.instantiate()` | `preload("res://x.tscn")` + `.instantiate()` | **完全一样** | `var bullet = bullet_scene.instantiate()` |
+| `position` / `global_position` | `position` / `global_position` | **完全一样**（3D 用 `Vector3`）| `player.global_position` |
+| `signal xxx` + `connect` | `signal xxx` + `connect` | **完全一样** | `target.hit.connect(_on_target_hit)` |
+| `_process(delta)` / `_physics_process(delta)` | `_process(delta)` / `_physics_process(delta)` | **完全一样** | `func _physics_process(delta):` |
+| `process_mode = ALWAYS` | `process_mode = ALWAYS` | **完全一样** | module-10 暂停时菜单能用 |
+| `transform.basis.x` / `.y` | `transform.basis.x` / `.y` / **`.z`** | 3D 多了 Z 轴 | 子弹朝前飞 = `-transform.basis.z` |
+| — | `DirectionalLight3D` | **3D 必加**（没光 = 全黑）| 太阳光 / 平行光，`Shadow Enabled = ON` |
+| — | `WorldEnvironment` | 天空颜色 / 雾效 | `Background Mode = Sky` |
+
+**一句话总结**：
+
+> **80% 的 2D 经验 = 3D 经验**。剩下 20% 是 Z 轴、3D 形状、body_entered、DirectionalLight3D。
+
+---
+
+## 每节 1-2 句要点 + 最小代码片段
+
+### 第 1 节：3D 节点 + 轨道相机
+
+**1 句要点**：把 `Sprite2D` 换成 `MeshInstance3D`，把 `Camera2D` 换成 `Camera3D`，就能从 2D 切到 3D。
+
+**最小代码**（orbital camera 1 行）：
 
 ```gdscript
 # Camera3D.gd
@@ -58,33 +75,13 @@ func _process(delta):
     look_at(Vector3.ZERO, Vector3.UP)
 ```
 
-**解释**：
-- `Vector3.ZERO` = 原点（0,0,0），立方体在原点
-- `Vector3.UP` = Y 轴正方向（"头顶"向上），保证相机不翻转
-
-### 验收
-- [ ] F6 能跑起来，看见彩色立方体
-- [ ] 能说出 `MeshInstance3D` 相当于 2D 的什么
-- [ ] 能解释 `Camera3D.look_at()` 两个参数的意思
-
 ---
 
-## 第 2 节：CharacterBody3D 角色移动
+### 第 2 节：`CharacterBody3D` 移动
 
-### 节点树
-```
-Main（Node3D）
-├── Player（CharacterBody3D）  ← 核心
-│    ├── MeshInstance3D（BoxMesh，缩小一点当角色）
-│    └── CollisionShape3D（BoxShape3D）
-├── Floor（StaticBody3D）  ← 地面
-│    ├── MeshInstance3D（BoxMesh，Y 压扁）
-│    └── CollisionShape3D
-├── DirectionalLight3D
-└── Camera3D（俯视 XZ 平面，Position 0,15,0，Look At Player）
-```
+**1 句要点**：`Input.get_vector` 返回 `Vector2`；**把它升级成 `Vector3(x, 0, y)`**——Y 永远 = 0 = 2D topdown 在 3D 的等价。
 
-### 移动代码（从 2D 迁移）
+**最小代码**（WASD 移动）：
 
 ```gdscript
 # Player.gd
@@ -93,152 +90,72 @@ extends CharacterBody3D
 @export var speed: float = 10.0
 
 func _physics_process(delta):
-    # 2D 写法：velocity = Input.get_vector(...) * speed
-    # 3D 写法：把 Vector2(X,Y) 变成 Vector3(X, 0, Y)
-    # ——2D 的 Y 变成 3D 的 Z！
     var input_dir = Input.get_vector("left", "right", "up", "down")
     velocity = Vector3(input_dir.x, 0, input_dir.y) * speed
     move_and_slide()
 ```
 
-**迁移口诀**：
-> `Input.get_vector` 不变 → 结果 `Vector2(x, y)` → 变成 `Vector3(x, 0, y)` → Y 永远 = 0（锁定在 XZ 平面）= 2D topdown 的 3D 版本
-
-### Camera follow（跟在 Player 后面）
-
-```gdscript
-# Main.gd
-extends Node3D
-
-@onready var camera: Camera3D = $Camera3D
-@onready var player: CharacterBody3D = $Player
-
-func _process(delta):
-    camera.look_at(player.global_position, Vector3.UP)
-```
-
-### 验收
-- [ ] WASD 能让 Player 在 XZ 平面移动
-- [ ] 不会掉进 Floor 下面（CollisionShape3D 挡住）
-- [ ] 能解释为什么 Y 固定为 0
-
 ---
 
-## 第 3 节：子弹打靶（Area3D + 碰撞 + 信号）
+### 第 3 节：子弹 + `Area3D` 打靶
 
-### 节点树
-```
-Main（Node3D）
-├── Player（CharacterBody3D）  ← 第 2 节已有
-├── Target（StaticBody3D）  ← 新增：靶子
-│    ├── MeshInstance3D（BoxMesh，红色）
-│    └── CollisionShape3D
-├── SpawnPoint（Marker3D）  ← 新增：子弹出生点（Player 前方）
-├── BulletSpawner（Node3D）  ← 管理子弹
-├── DirectionalLight3D
-└── Camera3D
-```
+**1 句要点**：`Area2D` 变 `Area3D`，但**信号从 `area_entered` 变成 `body_entered`**（因为 Target 是 `StaticBody3D` 是 body 不是 area）。
 
-### Bullet.tscn 场景
-
-```
-Bullet（Area3D）  ← 用 Area3D 而不是 RigidBody（更简单）
-├── MeshInstance3D（Small BoxMesh 或 SphereMesh）
-├── CollisionShape3D
-└── VisibleOnScreenNotifier3D  ← 出了屏幕就销毁
-```
+**最小代码**（子弹朝前飞 + 击中销毁）：
 
 ```gdscript
 # Bullet.gd
 extends Area3D
 
-@export var speed: float = 30.0
+var speed: float = 30.0
 
 func _physics_process(delta):
-    # 一直朝前（-Z）飞
-    position += -transform.basis.z * speed * delta
-
-func _on_visible_on_screen_notifier_3d_screen_exited():
-    queue_free()  # 出屏幕就销毁，不浪费性能
-```
-
-### 按空格发射
-
-```gdscript
-# Main.gd 或 Player.gd
-@onready var bullet_scene = preload("res://bullet.tscn")
-@onready var spawn_point: Marker3D = $SpawnPoint
-
-func _input(event):
-    if event.is_action_pressed("shoot"):
-        var bullet = bullet_scene.instantiate()
-        bullet.position = spawn_point.global_position
-        bullet.transform.basis = spawn_point.transform.basis
-        add_child(bullet)
-```
-
-### 靶子被击中（`body_entered` 信号）
-
-```gdscript
-# Target.gd
-extends StaticBody3D
-
-signal hit
+    position += -transform.basis.z * speed * delta  # 朝 -Z 飞
 
 func _on_body_entered(body):
     if body.is_in_group("bullet"):
-        emit_signal("hit")
-        body.queue_free()  # 子弹销毁
-        queue_free()       # 靶子也销毁
+        body.queue_free()
+        queue_free()
 ```
-
-> **注意**：`body_entered` 在 Area3D 上用，表示"有物理 body 进入我的范围"。
-> `area_entered` 在另一个 Area3D 上用，表示"有 area 进入我的范围"。
-> Bullet 是 Area3D，Target 是 StaticBody3D → Target 用 `body_entered`。
-
-### 验收
-- [ ] 按空格键，子弹从枪口位置飞出去
-- [ ] 子弹碰到靶子，靶子消失
-- [ ] 能解释 `body_entered` vs `area_entered`
 
 ---
 
-## 第 4 节（可选）：2D survivor → 3D 移植
+### 第 4 节（可选）：2D survivor → 3D 移植
 
-### 三件核心事（2D → 3D）
+**1 句要点**：3D demo 和 2D survivor 的核心三件事**逻辑完全一样**——`Timer` spawn 敌人 / 子弹打中敌人 → 计分 / 升级菜单用 `CanvasLayer` 叠加 3D 场景。
 
-| 2D topdown survivor | 3D 移植 |
-|---|---|
-| Enemy spawn（Timer + add_child）| `add_child(enemy_instance)` 在 Timer timeout 里 |
-| 子弹击中 Enemy → score++ | `Enemy.body_entered` → `Score.add_point()` |
-| 升级菜单（CanvasLayer + process_mode=Always）| 3D 场景里 `add_child(CanvasLayer)`，逻辑完全一样 |
+**最小代码**（Timer spawn 敌人）：
 
-### 关键：CanvasLayer 在 3D 场景里叠加 UI
+```gdscript
+# Main.gd
+@onready var enemy_scene = preload("res://enemy.tscn")
+@onready var player: CharacterBody3D = $Player
 
-```
-Main（3D 场景）
-├── Player
-├── Enemies
-├── Bullets
-└── UpgradeLayer（CanvasLayer）  ← 2D UI 可以叠加在任何 3D 场景上！
-     └── CenterContainer → HBoxContainer → Button × 2
+func _on_spawn_timer_timeout():
+    var enemy = enemy_scene.instantiate()
+    enemy.position = player.position + Vector3(randf_range(-5, 5), 0, randf_range(-5, 5))
+    add_child(enemy)
 ```
 
-CanvasLayer 永远在最上层，跟下面的 3D 场景无关 —— 这是 module-10 "世界暂停，菜单继续"的经验直接复用。
+---
 
-### 验收
-- [ ] 能玩：走 → 敌人生成 → 被打掉 → 分数增加
-- [ ] 分数 > 10，升级菜单弹出来
-- [ ] 能说出 CanvasLayer 在 3D 场景里的作用（跟 2D 场景完全一样）
+## 老板 3 句话（学生上完 3D 入门后能做什么）
+
+> **第 1 句**：**能在 3D 空间里造一个能玩的场景**——3D 立方体 + 3D 光 + 3D 相机，能跑起来看。
+>
+> **第 2 句**：**能写 3D 版的角色控制 + 子弹打靶**——`CharacterBody3D` 移动、`Area3D` 子弹、`body_entered` 击中，**2D 经验全部迁移过来**。
+>
+> **第 3 句**：**能把 2D topdown survivor 翻译成 3D 版本**——`Timer` spawn 敌人 / 计分 / `CanvasLayer` 升级菜单 / `process_mode = ALWAYS` 暂停时菜单能用，**3D 场景的逻辑跟 2D 完全一样**，只是节点类型从 `2D` 变 `3D`。
 
 ---
 
 ## cheatsheet 写法提示（给朱古力）
 
-本模块 cheatsheet 建议：
+> 本节是**给作者看的 plan**，不是给学生看的 cheatsheet HTML。**作者**：朱古力（按本 plan 转 HTML 风格 cheatsheet，**6/18 规则——slide 不写讲稿**）。
 
 1. **不要**从零讲 3D 概念（学生会觉得在上一门新课）
-2. **用 2D → 3D 迁移对照表** 作为主体框架
+2. **用 2D → 3D 迁移对照表** 作为 cheatsheet 主体框架
 3. **代码块全部用 2D → 3D 并排对比**（学生扫码一看就懂差异在哪）
 4. **只写关键 diff**，不抄完整代码（学生课后查，不是上课用）
 5. **验收问题**每节结尾放 3 个（检查自己有没有跟上）
+6. **口诀**用 2D→3D 对照口诀（"Input.get_vector 不变 → Vector2 → Vector3(x, 0, y) → Y=0 = 2D topdown"）
